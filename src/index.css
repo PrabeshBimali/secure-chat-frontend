@@ -1,0 +1,27 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  --bg-primary: #F4F4F6;
+  --bg-secondary: #E7E7E7;
+  --bg-tertiary: #D2D2D4;
+  --text-primary: #464646;
+  --text-secondary: #545454;
+}
+
+.dark {
+  --bg-primary: #292929;
+  --bg-secondary: #484848;
+  --bg-tertiary: #7E7E7E;
+  --text-primary: #EDECEC;
+  --text-secondary: #FEFEFE;
+}
+
+@theme {
+  --color-bg-primary: var(--bg-primary);
+  --color-bg-secondary: var(--bg-secondary);
+  --color-bg-tertiary: var(--bg-tertiary);
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+}
