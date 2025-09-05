@@ -2,13 +2,27 @@ import { useState } from "react";
 import PrimaryButton from "../components/PrimaryButton";
 import AuthLayout from "../layouts/AuthLayout";
 import { validateEmail, validatePassword } from "../lib/authFormValidator";
+import { useAuth, type UserInfo } from "../context/AuthProvider";
+import { useToast } from "../context/ToastProvider";
+import { useNavigate } from "react-router";
 
 interface LoginFormData {
   email: string;
   password: string;
 }
 
+interface LoginResponse<T> {
+  success: boolean;
+  message: string;
+  field?: string;
+  data?: T
+}
+
 export default function LoginPage() {
+
+  const auth = useAuth()
+  const { addToast } = useToast()
+  const navigate = useNavigate()
 
   const [formData, setFormData] = useState<LoginFormData>({
     email: "",
@@ -53,7 +67,7 @@ export default function LoginPage() {
     return isErr
   }
 
-  function handleLogin() {
+  async function handleLogin() {
     try {
       setLoading(true)
       const validationErr = validateInputs(formData.email, formData.password)
@@ -63,8 +77,34 @@ export default function LoginPage() {
         return
       }
 
+      const rawResponse = await fetch(`${import.meta.env.VITE_API_URL}/auth/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify(formData),
+      });
+
+      const response: LoginResponse<UserInfo> = await rawResponse.json()
+
+      if(response.success) {
+        auth.refreshUser()
+        addToast("Logged in! Redirecting ...", "success")
+        setTimeout(() => navigate("/"), 3000)
+      } else {
+        if(response.field === "email") {
+          setEmailError(response.message)
+        } else if(response.field === "password") {
+          setPasswordError(response.message)
+        } else {
+          addToast(response.message, "error", 5000)
+        }
+      }
     } catch(e) {
       console.error(e)
+    } finally {
+      setLoading(false)
     }
   }
 

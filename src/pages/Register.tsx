@@ -2,6 +2,8 @@ import { useState } from "react";
 import PrimaryButton from "../components/PrimaryButton";
 import AuthLayout from "../layouts/AuthLayout";
 import { validateEmail, validatePassword, validateUsername } from "../lib/authFormValidator";
+import { useToast } from "../context/ToastProvider";
+import { useNavigate } from "react-router";
 
 interface RegisterFormData {
   username: string;
@@ -9,7 +11,23 @@ interface RegisterFormData {
   password: string;
 }
 
+interface RegisteredUser {
+  id: number;
+  email: string;
+  username: string;
+}
+
+interface RegisterResponse<T> {
+  success: boolean;
+  message: string;
+  field?: string;
+  data?: T
+}
+
 export default function RegisterPage() {
+
+  const { addToast } = useToast()
+  const navigate = useNavigate()
 
   const [formData, setFormData] = useState<RegisterFormData>({
     username: "",
@@ -64,7 +82,7 @@ export default function RegisterPage() {
     return isErr
   }
 
-  function handleRegister() {
+  async function handleRegister() {
     try {
       setLoading(true)
       const validationErr = validateInputs(formData.username, formData.email, formData.password)
@@ -74,8 +92,35 @@ export default function RegisterPage() {
         return
       }
 
+      const rawResponse = await fetch(`${import.meta.env.VITE_API_URL}/auth/register`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
+
+      const response: RegisterResponse<RegisteredUser> = await rawResponse.json()
+
+      if(response.success) {
+        addToast(`${response.message} Redirecting...`, "success")
+        setTimeout(() => navigate(`/email-verification-sent?id=${response.data?.id}&email=${response.data?.email}`,), 3000)
+      } else {
+        if(response.field === "username") {
+          setUsernameError(response.message)
+        } else if(response.field === "email") {
+          setEmailError(response.message)
+        } else if(response.field === "password") {
+          setPasswordError(response.message)
+        } else {
+          addToast(response.message, "error")
+        }
+      }
+
     } catch(e) {
       console.error(e)
+    } finally {
+      setLoading(false)
     }
   }
 
