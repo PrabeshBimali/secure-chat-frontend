@@ -40,6 +40,7 @@ export default function RegisterPage() {
   const [passwordError, setPasswordError] = useState<string>("")
   const [loading, setLoading] = useState(false)
 
+
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     const { name, value } = e.target
 
