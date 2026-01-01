@@ -1,4 +1,5 @@
-import type { DerivedKeys } from "../../types/global.interfaces";
+import type { DerivedKeys, MasterPublicKeys } from "../../types/global.interfaces";
+import { ed25519, x25519 } from "@noble/curves/ed25519.js";
 
 async function deriveBits(baseKey: CryptoKey, label: string): Promise<Uint8Array> {
   const key = await crypto.subtle.deriveBits(
@@ -15,8 +16,7 @@ async function deriveBits(baseKey: CryptoKey, label: string): Promise<Uint8Array
   return new Uint8Array(key)
 }
 
-// derive keys from seed
-export async function deriveKeysFromSeed(seed: Uint8Array): Promise<DerivedKeys> {
+async function deriveKeysFromSeed(seed: Uint8Array): Promise<DerivedKeys> {
   const masterKey: CryptoKey = await crypto.subtle.importKey(
     "raw", 
     seed.buffer as ArrayBuffer, 
@@ -31,5 +31,18 @@ export async function deriveKeysFromSeed(seed: Uint8Array): Promise<DerivedKeys>
   return {
     identityKey,
     encryptionKey
+  }
+}
+
+export async function derivePublicKey(seed: Uint8Array): Promise<MasterPublicKeys> {
+
+  const masterKeys = await deriveKeysFromSeed(seed)
+
+  const identityPublicKey = ed25519.getPublicKey(masterKeys.identityKey)
+  const encryptionPublicKey = x25519.getPublicKey(masterKeys.encryptionKey)
+
+  return {
+    identityPublicKey,
+    encryptionPublicKey
   }
 }
