@@ -2,7 +2,7 @@ import * as bip39 from "@scure/bip39";
 import { wordlist } from "@scure/bip39/wordlists/english.js";
 
 // Generates 12 words seed phrase
-export function generateMnemonicsNewUser(): string {
+export function generateMnemonics(): string {
   return bip39.generateMnemonic(wordlist);
 }
 
