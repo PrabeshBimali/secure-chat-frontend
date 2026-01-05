@@ -1,32 +1,28 @@
 import { FaCopy } from "react-icons/fa";
 import PrimaryButton from "./PrimaryButton";
-import { useEffect, useState } from "react";
-import { generateMnemonics } from "../lib/crypto/bip39";
+import { useState } from "react";
 import { useToast } from "../context/ToastProvider";
 
-export default function ShowSeedPhrase() {
-  const [rawPhrase, setRawPhrase] = useState<string>("")
-  const [seedPhrase, setSeedPhrase] = useState<Array<string>>([])
+interface ShowSeedPhraseProps {
+  rawPhrase: string
+  seedPhrase: string[]
+  onNext: () => void
+  onSeedRefresh: () => void
+}
+
+export default function ShowSeedPhrase(props: ShowSeedPhraseProps) {
+
+  const { rawPhrase, seedPhrase, onNext, onSeedRefresh} = props
+
   const [isChecked, setIsChecked] = useState<boolean>(false)
   const { addToast } = useToast()
-
-  function generateNewPhrase() {
-    const phrase = generateMnemonics()
-    setRawPhrase(phrase)
-    const phraseArr = phrase.split(" ")
-    setSeedPhrase(phraseArr)
-  }
 
   async function copyPhraseOnClipboard() {
     if(rawPhrase.length < 1) return
 
     await navigator.clipboard.writeText(rawPhrase)
-    addToast("Text copied", "success", 2)
+    addToast("Text copied", "success", 1000)
   }
-
-  useEffect(() => {
-    generateNewPhrase()
-  }, [])
 
   return (
     <div>
@@ -35,14 +31,15 @@ export default function ShowSeedPhrase() {
       </div>
       <div className="grid grid-cols-3 gap-5">
         {
-          seedPhrase.map(v => {
+          seedPhrase.map((word, index) => {
             return (
               <input 
                 type="text"
-                value={v} 
+                value={`${index + 1}. ${word}`} 
+                key={index}
                 readOnly
                 className={`bg-white dark:bg-gray-800 cursor-default text-text-primary text-center tracking-wide focus:outline-none rounded-lg px-4 py-3
-                            border-1 border-gray-300 dark:border-gray-600`}
+                            border-1 border-gray-300 dark:border-gray-600 select-none`}
               />
             )
           })
@@ -54,15 +51,15 @@ export default function ShowSeedPhrase() {
             type="checkbox"
             checked={isChecked}
             onChange={(e) => setIsChecked(e.target.checked)}
-            className="w-5 h-5"
+            className="w-5 h-5 cursor-pointer"
           />
           <label>
-            I have saved my seed phrase securely. 
+            I have saved my seed phrase. 
           </label>
         </div>
         <div className="flex md:flex-row flex-col md:justify-around gap-3">
-          <PrimaryButton name="Generate New Key" isLoading={false} handleClick={generateNewPhrase}/>
-          <PrimaryButton name="Move Forward" isLoading={false} handleClick={() => console.log("hmm")} disable={!isChecked}/>
+          <PrimaryButton name="Generate New Key" isLoading={false} handleClick={onSeedRefresh}/>
+          <PrimaryButton name="Move Forward" isLoading={false} handleClick={onNext} disable={!isChecked}/>
         </div>
       </div>
     </div>
