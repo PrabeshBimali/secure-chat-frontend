@@ -23,7 +23,7 @@ interface RegisterResponse<T> {
   data?: T
 }
 
-export default function RegisterPage() {
+export default function RegisterForm() {
 
   const { addToast } = useToast()
   const navigate = useNavigate()

@@ -3,6 +3,7 @@ import ShowSeedPhrase from "../components/ShowSeedPhrase";
 import AuthLayout from "../layouts/AuthLayout";
 import VerifySeedPhrase from "../components/VerifySeedPhrase";
 import { generateMnemonics } from "../lib/crypto/bip39";
+import RegisterForm from "../components/RegisterForm";
 
 export default function RegisterPage() {
 
@@ -39,6 +40,8 @@ export default function RegisterPage() {
                         onBack={() => setStep(1)}
                       />
       }
+
+      {step === 3 && <RegisterForm/>}
     </AuthLayout>
   )
 }
