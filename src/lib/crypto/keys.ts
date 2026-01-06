@@ -17,7 +17,7 @@ async function deriveBits(baseKey: CryptoKey, label: string): Promise<Uint8Array
   return new Uint8Array(key)
 }
 
-async function deriveKeysFromSeed(seed: Uint8Array): Promise<DerivedKeys> {
+async function derivePrivateKeysFromSeed(seed: Uint8Array): Promise<DerivedKeys> {
   const masterKey: CryptoKey = await crypto.subtle.importKey(
     "raw", 
     seed.buffer as ArrayBuffer, 
@@ -35,12 +35,12 @@ async function deriveKeysFromSeed(seed: Uint8Array): Promise<DerivedKeys> {
   }
 }
 
-export async function derivePublicKey(seed: Uint8Array): Promise<MasterPublicKeys> {
+export async function derivePublicKeys(seed: Uint8Array): Promise<MasterPublicKeys> {
 
-  const masterKeys = await deriveKeysFromSeed(seed)
+  const keys = await derivePrivateKeysFromSeed(seed)
 
-  const identityPublicKey = ed25519.getPublicKey(masterKeys.identityKey)
-  const encryptionPublicKey = x25519.getPublicKey(masterKeys.encryptionKey)
+  const identityPublicKey = ed25519.getPublicKey(keys.identityKey)
+  const encryptionPublicKey = x25519.getPublicKey(keys.encryptionKey)
 
   return {
     identityPublicKey,
@@ -50,14 +50,14 @@ export async function derivePublicKey(seed: Uint8Array): Promise<MasterPublicKey
 
 export async function generateStorageKey(password: string, salt: Uint8Array): Promise<Uint8Array> {
   const storageKey = await argon2id({
-                      password: password,
-                      salt: salt,
-                      parallelism: 1,
-                      iterations: 2,
-                      memorySize: 19456, // use 19Mb memory
-                      hashLength: 32, // output size = 32 bytes
-                      outputType: "binary", // return Uint8Array
-                    });
+    password: password,
+    salt: salt,
+    parallelism: 1,
+    iterations: 2,
+    memorySize: 19456, // use 19Mb memory
+    hashLength: 32, // output size = 32 bytes
+    outputType: "binary", // return Uint8Array
+  });
 
   return storageKey
 }
