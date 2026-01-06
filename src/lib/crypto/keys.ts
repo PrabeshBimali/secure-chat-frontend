@@ -1,5 +1,6 @@
 import type { DerivedKeys, MasterPublicKeys } from "../../types/global.interfaces";
 import { ed25519, x25519 } from "@noble/curves/ed25519.js";
+import { argon2id } from "hash-wasm"
 
 async function deriveBits(baseKey: CryptoKey, label: string): Promise<Uint8Array> {
   const key = await crypto.subtle.deriveBits(
@@ -46,3 +47,18 @@ export async function derivePublicKey(seed: Uint8Array): Promise<MasterPublicKey
     encryptionPublicKey
   }
 }
+
+export async function generateStorageKey(password: string, salt: Uint8Array): Promise<Uint8Array> {
+  const storageKey = await argon2id({
+                      password: password,
+                      salt: salt,
+                      parallelism: 1,
+                      iterations: 2,
+                      memorySize: 19456, // use 19Mb memory
+                      hashLength: 32, // output size = 32 bytes
+                      outputType: "binary", // return Uint8Array
+                    });
+
+  return storageKey
+}
+
