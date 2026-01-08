@@ -41,7 +41,10 @@ export default function RegisterPage() {
                       />
       }
 
-      {step === 3 && <RegisterForm/>}
+      {step === 3 && <RegisterForm
+                        rawPhrase={rawPhrase}
+                      />
+      }
     </AuthLayout>
   )
 }

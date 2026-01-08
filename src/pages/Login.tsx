@@ -1,7 +1,7 @@
 import { useState } from "react";
 import PrimaryButton from "../components/PrimaryButton";
 import AuthLayout from "../layouts/AuthLayout";
-import { validateEmail, validatePassword } from "../lib/authFormValidator";
+import { validateEmail, validatePassword } from "../services/authServices";
 import { useAuth, type UserInfo } from "../context/AuthProvider";
 import { useToast } from "../context/ToastProvider";
 import { useNavigate } from "react-router";

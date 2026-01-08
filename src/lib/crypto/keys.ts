@@ -62,3 +62,16 @@ export async function generateStorageKey(password: string, salt: Uint8Array): Pr
   return storageKey
 }
 
+export async function generateDeviceIdKeys(): Promise<CryptoKeyPair> {
+  const keys = await crypto.subtle.generateKey(
+    {
+      name: "ECDSA",
+      namedCurve: "P-256"
+    },
+    false,
+    ["sign", "verify"]
+  )
+
+  return keys
+}
+

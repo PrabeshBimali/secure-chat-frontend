@@ -1,13 +1,32 @@
 import { useState } from "react";
 import PrimaryButton from "../components/PrimaryButton";
-import { validateEmail, validatePassword, validateUsername } from "../lib/authFormValidator";
+import { validateEmail, validatePassword, validateUsername } from "../services/authServices";
 import { useToast } from "../context/ToastProvider";
 import { useNavigate } from "react-router";
+import { generateSeed } from "../lib/crypto/bip39";
+import { derivePublicKeys, generateDeviceIdKeys } from "../lib/crypto/keys";
+import { bytesToHex } from "@noble/curves/utils.js";
+import getDeviceInfo from "../lib/utils/device";
 
-interface RegisterFormData {
+export interface BasicRegistration {
   username: string;
   email: string;
   password: string;
+}
+
+export interface DeviceRegistration {
+  name: string
+  browser: string
+  os: string
+  device_pbk: string
+}
+
+interface RegistrationPayload {
+  username: string
+  email: string
+  encryption_pbk: string
+  identity_pbk: string
+  device: DeviceRegistration
 }
 
 interface RegisteredUser {
@@ -23,12 +42,18 @@ interface RegisterResponse<T> {
   data?: T
 }
 
-export default function RegisterForm() {
+interface RegisterFormProps {
+  rawPhrase: string
+}
+
+export default function RegisterForm(props: RegisterFormProps) {
+
+  const { rawPhrase } = props
 
   const { addToast } = useToast()
   const navigate = useNavigate()
 
-  const [formData, setFormData] = useState<RegisterFormData>({
+  const [formData, setFormData] = useState<BasicRegistration>({
     username: "",
     email: "",
     password: ""
@@ -92,12 +117,33 @@ export default function RegisterForm() {
         return
       }
 
+      const masterSeed = await generateSeed(rawPhrase)
+      const publicKeys = await derivePublicKeys(masterSeed)
+      const identityPublicKey = bytesToHex(publicKeys.identityPublicKey)
+      const encryptionPublicKey = bytesToHex(publicKeys.encryptionPublicKey)
+      const deviceInfo = getDeviceInfo()
+      const deviceIdentityKeys = await generateDeviceIdKeys()
+      const devicePublicKey = await crypto.subtle.exportKey("spki", deviceIdentityKeys.publicKey)
+
+      const registrationPayload: RegistrationPayload = {
+        username: formData.username,
+        email: formData.password,
+        encryption_pbk: encryptionPublicKey,
+        identity_pbk: identityPublicKey,
+        device: {
+          name: deviceInfo.name,
+          browser: deviceInfo.browser,
+          os: deviceInfo.os,
+          device_pbk: String.fromCharCode(...new Uint8Array(devicePublicKey))
+        }
+      }
+
       const rawResponse = await fetch(`${import.meta.env.VITE_API_URL}/auth/register`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(registrationPayload),
       });
 
       const response: RegisterResponse<RegisteredUser> = await rawResponse.json()
