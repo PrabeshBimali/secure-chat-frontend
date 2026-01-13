@@ -1,5 +1,3 @@
-// return empty string when no errors, return error msg when there is error
-
 export function validateUsername(username: string): string {
 
   const user = username.toLowerCase()

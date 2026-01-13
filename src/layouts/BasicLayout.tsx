@@ -4,7 +4,7 @@ interface AppLayoutProps {
 
 export default function BasicLayout({ children }: AppLayoutProps) {
   return (
-    <div className="h-screen bg-gray-50 text-gray-900">
+    <div className="h-screen bg-bg-primary text-text-primary">
       {children}
     </div>
   );

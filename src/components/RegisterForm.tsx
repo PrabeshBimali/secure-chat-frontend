@@ -7,6 +7,8 @@ import { generateSeed } from "../lib/crypto/bip39";
 import { derivePublicKeys, generateDeviceIdKeys } from "../lib/crypto/keys";
 import { bytesToHex } from "@noble/curves/utils.js";
 import getDeviceInfo from "../lib/utils/device";
+import { prepareVaultForRegistration } from "../lib/crypto/vault";
+import { initializeDb, saveIdentity, type LocalVault } from "../db/indexedb";
 
 export interface BasicRegistration {
   username: string;
@@ -38,7 +40,7 @@ interface RegisteredUser {
 interface RegisterResponse<T> {
   success: boolean;
   message: string;
-  field?: string;
+  details?: any;
   data?: T
 }
 
@@ -62,7 +64,7 @@ export default function RegisterForm(props: RegisterFormProps) {
   const [usernameError, setUsernameError] = useState<string>("")
   const [emailError, setEmailError] = useState<string>("")
   const [passwordError, setPasswordError] = useState<string>("")
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(true)
 
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -127,14 +129,14 @@ export default function RegisterForm(props: RegisterFormProps) {
 
       const registrationPayload: RegistrationPayload = {
         username: formData.username,
-        email: formData.password,
+        email: formData.email,
         encryption_pbk: encryptionPublicKey,
         identity_pbk: identityPublicKey,
         device: {
           name: deviceInfo.name,
           browser: deviceInfo.browser,
           os: deviceInfo.os,
-          device_pbk: String.fromCharCode(...new Uint8Array(devicePublicKey))
+          device_pbk: btoa(String.fromCharCode(...new Uint8Array(devicePublicKey)))
         }
       }
 
@@ -149,15 +151,27 @@ export default function RegisterForm(props: RegisterFormProps) {
       const response: RegisterResponse<RegisteredUser> = await rawResponse.json()
 
       if(response.success) {
+        const vault = await prepareVaultForRegistration(formData.password, masterSeed)
+
+        const dataToStore: LocalVault = {
+          username: formData.username,
+          ciphertext: new Uint8Array(vault.cipherText),
+          iv: vault.iv,
+          salt: vault.salt,
+          device_pbk: registrationPayload.device.device_pbk,
+          device_privk: deviceIdentityKeys.privateKey
+        }
+
+        const db = await initializeDb()
+        await saveIdentity(db, dataToStore)
+
         addToast(`${response.message} Redirecting...`, "success")
         setTimeout(() => navigate(`/email-verification-sent?id=${response.data?.id}&email=${response.data?.email}`,), 3000)
       } else {
-        if(response.field === "username") {
-          setUsernameError(response.message)
-        } else if(response.field === "email") {
-          setEmailError(response.message)
-        } else if(response.field === "password") {
-          setPasswordError(response.message)
+        if(response.details.fieldErrors.username) {
+          setUsernameError(response.details.fieldErrors.username)
+        } else if(response.details.fieldErrors.email) {
+          setEmailError(response.details.fieldErrors.email)
         } else {
           addToast(response.message, "error")
         }
@@ -208,7 +222,7 @@ export default function RegisterForm(props: RegisterFormProps) {
           </div>
         </div>
         <div className="flex flex-col gap-2">
-          <label className="font-semibold text-text-secondary">Password:</label>
+          <label className="font-semibold text-text-secondary">Device's Password:</label>
           <input 
             type="password" 
             name="password"
