@@ -1,47 +1,29 @@
-export function validateUsername(username: string): string {
+import type { HTTPResponse } from "../types/global.interfaces";
 
-  const user = username.toLowerCase()
+const API_URL = `${import.meta.env.VITE_API_URL}`
 
-  if (!user.trim()) return "Username is required";
-
-  if (user.length < 3) return "Username must be at least 3 characters";
-
-  if (user.length > 36) return "Username must be less than 36 characters";
-
-  if (!/^[a-z][a-z0-9_]*$/.test(username)) return "Only letters, numbers, and underscores are allowed";
-
-  return "";
+interface RequestChallengeResponse {
+  userid: number
+  nonce: string
 }
 
-export function validateEmail(email: string): string {
+export async function requestChallenge(username: string, device_pbk: string): Promise<HTTPResponse<RequestChallengeResponse>> {
 
-  const lEmail = email.toLocaleLowerCase()
-
-  if(!lEmail.trim()) return "Email is required";
-  
-  if(lEmail.length > 254) return "Email must be less than 254 Characters"
-  
-  const regex: RegExp = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
-
-  if(!regex.test(lEmail)) {
-    return "Enter valid Email. Eg: you@domain.com"
+  const requestChallengePayload = {
+    username, 
+    device_pbk
   }
 
-  return "";
-}
+  const rawResponse = await fetch(`${API_URL}/auth/request-challenge`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    credentials: "include",
+    body: JSON.stringify(requestChallengePayload),
+  });
 
-export function validatePassword(password: string): string {
+  const response: HTTPResponse<RequestChallengeResponse> = await rawResponse.json()
 
-  if(!password.trim()) return "Password is required";
-
-  if(password.length < 10) return "Password must be atleast 10 characters"
-
-  const regex: RegExp = /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$/
-
-  if(!regex.test(password)) {
-    return "Password must contain a least one small letter, capital letter, number and special character"
-  }
-
-  return ""
-
+  return response
 }

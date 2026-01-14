@@ -7,3 +7,10 @@ export interface MasterPublicKeys {
   identityPublicKey: Uint8Array
   encryptionPublicKey: Uint8Array
 }
+
+export interface HTTPResponse<T> {
+  success: boolean
+  message: string
+  details?: any
+  data?: T
+}

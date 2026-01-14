@@ -1,14 +1,15 @@
 import { useState } from "react";
 import PrimaryButton from "../components/PrimaryButton";
-import { validateEmail, validatePassword, validateUsername } from "../services/authServices";
+import { validateEmail, validatePassword, validateUsername } from "../lib/utils/formValidation";
 import { useToast } from "../context/ToastProvider";
 import { useNavigate } from "react-router";
 import { generateSeed } from "../lib/crypto/bip39";
 import { derivePublicKeys, generateDeviceIdKeys } from "../lib/crypto/keys";
 import { bytesToHex } from "@noble/curves/utils.js";
 import getDeviceInfo from "../lib/utils/device";
-import { prepareVaultForRegistration } from "../lib/crypto/vault";
+import { encryptMasterSeed } from "../lib/crypto/vault";
 import { initializeDb, saveIdentity, type LocalVault } from "../db/indexedb";
+import type { HTTPResponse } from "../types/global.interfaces";
 
 export interface BasicRegistration {
   username: string;
@@ -37,13 +38,6 @@ interface RegisteredUser {
   username: string;
 }
 
-interface RegisterResponse<T> {
-  success: boolean;
-  message: string;
-  details?: any;
-  data?: T
-}
-
 interface RegisterFormProps {
   rawPhrase: string
 }
@@ -64,7 +58,7 @@ export default function RegisterForm(props: RegisterFormProps) {
   const [usernameError, setUsernameError] = useState<string>("")
   const [emailError, setEmailError] = useState<string>("")
   const [passwordError, setPasswordError] = useState<string>("")
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(false)
 
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -148,10 +142,10 @@ export default function RegisterForm(props: RegisterFormProps) {
         body: JSON.stringify(registrationPayload),
       });
 
-      const response: RegisterResponse<RegisteredUser> = await rawResponse.json()
+      const response: HTTPResponse<RegisteredUser> = await rawResponse.json()
 
       if(response.success) {
-        const vault = await prepareVaultForRegistration(formData.password, masterSeed)
+        const vault = await encryptMasterSeed(formData.password, masterSeed)
 
         const dataToStore: LocalVault = {
           username: formData.username,

@@ -17,7 +17,7 @@ async function deriveBits(baseKey: CryptoKey, label: string): Promise<Uint8Array
   return new Uint8Array(key)
 }
 
-async function derivePrivateKeysFromSeed(seed: Uint8Array): Promise<DerivedKeys> {
+export async function derivePrivateKeysFromSeed(seed: Uint8Array): Promise<DerivedKeys> {
   const masterKey: CryptoKey = await crypto.subtle.importKey(
     "raw", 
     seed.buffer as ArrayBuffer, 

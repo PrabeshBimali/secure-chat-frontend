@@ -1,21 +1,17 @@
 import { useState } from "react";
 import PrimaryButton from "../components/PrimaryButton";
 import AuthLayout from "../layouts/AuthLayout";
-import { validateEmail, validatePassword } from "../services/authServices";
-import { useAuth, type UserInfo } from "../context/AuthProvider";
+import { validatePassword, validateUsername } from "../lib/utils/formValidation";
+import { useAuth } from "../context/AuthProvider";
 import { useToast } from "../context/ToastProvider";
 import { useNavigate } from "react-router";
+import { getIdentity, initializeDb } from "../db/indexedb";
+import { requestChallenge } from "../services/authServices";
+import { signDevice } from "../lib/crypto/sign";
 
 interface LoginFormData {
-  email: string;
+  username: string;
   password: string;
-}
-
-interface LoginResponse<T> {
-  success: boolean;
-  message: string;
-  field?: string;
-  data?: T
 }
 
 export default function LoginPage() {
@@ -25,19 +21,19 @@ export default function LoginPage() {
   const navigate = useNavigate()
 
   const [formData, setFormData] = useState<LoginFormData>({
-    email: "",
+    username: "",
     password: ""
   })
 
-  const [emailError, setEmailError] = useState<string>("")
+  const [usernameError, setUsernameError] = useState<string>("")
   const [passwordError, setPasswordError] = useState<string>("")
   const [loading, setLoading] = useState(false)
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     const { name, value } = e.target
 
-    if(name === "email") {
-      setEmailError("")
+    if(name === "username") {
+      setUsernameError("")
     } else if(name === "password") {
       setPasswordError("")
     }
@@ -48,14 +44,14 @@ export default function LoginPage() {
     }));
   }
 
-  function validateInputs(email: string, password: string): boolean {
+  function validateInputs(username: string, password: string): boolean {
 
-    const emailErr = validateEmail(email)
+    const usernameErr = validateUsername(username)
     const pwdErr = validatePassword(password)
     let isErr = false
 
-    if(emailErr !== "") {
-      setEmailError(emailErr)
+    if(usernameErr !== "") {
+      setUsernameError(usernameErr)
       isErr = true
     }
 
@@ -70,33 +66,43 @@ export default function LoginPage() {
   async function handleLogin() {
     try {
       setLoading(true)
-      const validationErr = validateInputs(formData.email, formData.password)
+      const validationErr = validateInputs(formData.username, formData.password)
 
       if(validationErr) {
         setLoading(false)
         return
       }
 
-      const rawResponse = await fetch(`${import.meta.env.VITE_API_URL}/auth/login`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify(formData),
-      });
+      const db = await initializeDb()
+      const userData = await getIdentity(db, formData.username)
 
-      const response: LoginResponse<UserInfo> = await rawResponse.json()
+      if(!userData) {
+        setUsernameError("Account not linked with the Device")
+        return
+      }
+
+      const response = await requestChallenge(formData.username, userData.device_pbk)
 
       if(response.success) {
-        auth.refreshUser()
-        addToast("Logged in! Redirecting ...", "success")
-        setTimeout(() => navigate("/"), 3000)
+        //auth.refreshUser()
+        //addToast("Logged in! Redirecting ...", "success")
+        //setTimeout(() => navigate("/"), 3000)
+
+        if(response.data === undefined) {
+          addToast("Server Error. Please, Try again!", "error", 5000)
+          throw new Error("data not received from server")
+        }
+
+        const deviceSignature = signDevice(response.data.nonce, userData.device_privk)
+
       } else {
-        if(response.field === "email") {
-          setEmailError(response.message)
-        } else if(response.field === "password") {
-          setPasswordError(response.message)
+        console.log(response)
+        if(response.details.fieldErrors.credentials) {
+          setUsernameError(" ")
+          setPasswordError(response.details.fieldErrors.credentials)
+        } else if(response.details.fieldErrors.device) {
+          setUsernameError(" ")
+          setPasswordError(response.details.fieldErrors.device)
         } else {
           addToast(response.message, "error", 5000)
         }
@@ -115,23 +121,23 @@ export default function LoginPage() {
           Login
         </div>
         <div className="flex flex-col gap-2">
-          <label className="font-semibold text-text-secondary">Email:</label>
+          <label className="font-semibold text-text-secondary">Username:</label>
           <input 
             type="text" 
-            placeholder="harry@gmail.com"
-            name="email"
-            value={formData.email}
+            placeholder="andrew123"
+            name="username"
+            value={formData.username}
             onChange={handleChange}
-            className={`w-full px-4 py-2 rounded-lg border-2 ${emailError !== "" ? "border-red-500" : "border-gray-300 dark:border-gray-600"} 
+            className={`w-full px-4 py-2 rounded-lg border-2 ${usernameError !== "" ? "border-red-500" : "border-gray-300 dark:border-gray-600"} 
                     bg-white dark:bg-gray-800 text-text-primary placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 
                     focus:ring-blue-500 focus:border-blue-500 tracking-wide transition`}
           />
-          <div className={`text-xs font-semibold tracking-wide ${emailError === "" ? "text-bg-secondary" : "text-red-500"}`}>
-            { emailError === "" ? "No Error" : emailError }
+          <div className={`text-xs font-semibold tracking-wide ${usernameError === "" ? "text-bg-secondary" : "text-red-500"}`}>
+            { usernameError === "" ? "No Error" : usernameError }
           </div>
         </div>
         <div className="flex flex-col gap-2">
-          <label className="font-semibold text-text-secondary">Password:</label>
+          <label className="font-semibold text-text-secondary">Device Password:</label>
           <input 
             type="password" 
             name="password"
