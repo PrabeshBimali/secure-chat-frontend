@@ -31,7 +31,7 @@ export async function signIdentity(nonceHex: string, password: string, cipherTex
     false, 
     ["decrypt"]
   );
-
+  
   const masterSeed = await crypto.subtle.decrypt(
     {
       name: "AES-GCM",

@@ -9,33 +9,12 @@ import { bytesToHex } from "@noble/curves/utils.js";
 import getDeviceInfo from "../lib/utils/device";
 import { encryptMasterSeed } from "../lib/crypto/vault";
 import { initializeDb, saveIdentity, type LocalVault } from "../db/indexedb";
-import type { HTTPResponse } from "../types/global.interfaces";
+import { register, type RegistrationPayload } from "../services/authServices";
 
 export interface BasicRegistration {
   username: string;
   email: string;
   password: string;
-}
-
-export interface DeviceRegistration {
-  name: string
-  browser: string
-  os: string
-  device_pbk: string
-}
-
-interface RegistrationPayload {
-  username: string
-  email: string
-  encryption_pbk: string
-  identity_pbk: string
-  device: DeviceRegistration
-}
-
-interface RegisteredUser {
-  id: number;
-  email: string;
-  username: string;
 }
 
 interface RegisterFormProps {
@@ -103,6 +82,16 @@ export default function RegisterForm(props: RegisterFormProps) {
     return isErr
   }
 
+  function handleServerErrors(response: any) {
+    if(response.details.fieldErrors.username) {
+      setUsernameError(response.details.fieldErrors.username)
+    } else if(response.details.fieldErrors.email) {
+      setEmailError(response.details.fieldErrors.email)
+    } else {
+      addToast(response.message, "error")
+    }
+  }
+
   async function handleRegister() {
     try {
       setLoading(true)
@@ -119,7 +108,7 @@ export default function RegisterForm(props: RegisterFormProps) {
       const encryptionPublicKey = bytesToHex(publicKeys.encryptionPublicKey)
       const deviceInfo = getDeviceInfo()
       const deviceIdentityKeys = await generateDeviceIdKeys()
-      const devicePublicKey = await crypto.subtle.exportKey("spki", deviceIdentityKeys.publicKey)
+      const devicePublicKey = await crypto.subtle.exportKey("raw", deviceIdentityKeys.publicKey)
 
       const registrationPayload: RegistrationPayload = {
         username: formData.username,
@@ -130,19 +119,11 @@ export default function RegisterForm(props: RegisterFormProps) {
           name: deviceInfo.name,
           browser: deviceInfo.browser,
           os: deviceInfo.os,
-          device_pbk: btoa(String.fromCharCode(...new Uint8Array(devicePublicKey)))
+          device_pbk: bytesToHex(new Uint8Array(devicePublicKey))
         }
       }
 
-      const rawResponse = await fetch(`${import.meta.env.VITE_API_URL}/auth/register`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(registrationPayload),
-      });
-
-      const response: HTTPResponse<RegisteredUser> = await rawResponse.json()
+      const response = await register(registrationPayload)
 
       if(response.success) {
         const vault = await encryptMasterSeed(formData.password, masterSeed)
@@ -162,13 +143,7 @@ export default function RegisterForm(props: RegisterFormProps) {
         addToast(`${response.message} Redirecting...`, "success")
         setTimeout(() => navigate(`/email-verification-sent?id=${response.data?.id}&email=${response.data?.email}`,), 3000)
       } else {
-        if(response.details.fieldErrors.username) {
-          setUsernameError(response.details.fieldErrors.username)
-        } else if(response.details.fieldErrors.email) {
-          setEmailError(response.details.fieldErrors.email)
-        } else {
-          addToast(response.message, "error")
-        }
+        handleServerErrors(response)
       }
 
     } catch(e) {

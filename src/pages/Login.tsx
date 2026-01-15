@@ -6,8 +6,8 @@ import { useAuth } from "../context/AuthProvider";
 import { useToast } from "../context/ToastProvider";
 import { useNavigate } from "react-router";
 import { getIdentity, initializeDb } from "../db/indexedb";
-import { requestChallenge } from "../services/authServices";
-import { signDevice } from "../lib/crypto/sign";
+import { requestChallenge, verifyChallenge } from "../services/authServices";
+import { signDevice, signIdentity } from "../lib/crypto/sign";
 
 interface LoginFormData {
   username: string;
@@ -63,9 +63,23 @@ export default function LoginPage() {
     return isErr
   }
 
+  function handleServerErrors(response: any) {
+    if(response.details.fieldErrors.credentials) {
+      setUsernameError(" ")
+      setPasswordError(response.details.fieldErrors.credentials)
+    } else if(response.details.fieldErrors.device) {
+      setUsernameError(" ")
+      setPasswordError(response.details.fieldErrors.device)
+    } else {
+      addToast(response.message, "error", 5000)
+    }
+  }
+
   async function handleLogin() {
     try {
       setLoading(true)
+      setUsernameError("")
+      setPasswordError("")
       const validationErr = validateInputs(formData.username, formData.password)
 
       if(validationErr) {
@@ -81,34 +95,40 @@ export default function LoginPage() {
         return
       }
 
-      const response = await requestChallenge(formData.username, userData.device_pbk)
+      const requestChallengeResponse = await requestChallenge(formData.username, userData.device_pbk)
 
-      if(response.success) {
-        //auth.refreshUser()
-        //addToast("Logged in! Redirecting ...", "success")
-        //setTimeout(() => navigate("/"), 3000)
+      if(requestChallengeResponse.success) {
 
-        if(response.data === undefined) {
+        if(requestChallengeResponse.data === undefined) {
           addToast("Server Error. Please, Try again!", "error", 5000)
           throw new Error("data not received from server")
         }
 
-        const deviceSignature = signDevice(response.data.nonce, userData.device_privk)
+        const deviceSignature = await signDevice(requestChallengeResponse.data.nonce, userData.device_privk)
+        const identitySignature = await signIdentity(requestChallengeResponse.data.nonce, formData.password, userData.ciphertext, userData.iv, userData.salt)
+
+        const verifyChallengeResponse = await verifyChallenge(
+          requestChallengeResponse.data.userid, 
+          userData.device_pbk,
+          deviceSignature,
+          identitySignature
+        )
+
+        if(verifyChallengeResponse.success) {
+          // complete this
+          //auth.refreshUser()
+          //addToast("Logged in! Redirecting ...", "success")
+          //setTimeout(() => navigate("/"), 3000)
+          console.log(verifyChallengeResponse)
+        } else {
+          handleServerErrors(verifyChallengeResponse)
+        }
 
       } else {
-        console.log(response)
-        if(response.details.fieldErrors.credentials) {
-          setUsernameError(" ")
-          setPasswordError(response.details.fieldErrors.credentials)
-        } else if(response.details.fieldErrors.device) {
-          setUsernameError(" ")
-          setPasswordError(response.details.fieldErrors.device)
-        } else {
-          addToast(response.message, "error", 5000)
-        }
+        handleServerErrors(requestChallengeResponse)
       }
     } catch(e) {
-      console.error(e)
+      console.error("Unknown Error: ", e)
     } finally {
       setLoading(false)
     }
