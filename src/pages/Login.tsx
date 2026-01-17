@@ -64,14 +64,18 @@ export default function LoginPage() {
   }
 
   function handleServerErrors(response: any) {
+    // response.details undefined means Internal server error
+    if(response.details === undefined) {
+      addToast(response.message, "error", 5000)
+      return
+    }
+
     if(response.details.fieldErrors.credentials) {
       setUsernameError(" ")
       setPasswordError(response.details.fieldErrors.credentials)
     } else if(response.details.fieldErrors.device) {
       setUsernameError(" ")
       setPasswordError(response.details.fieldErrors.device)
-    } else {
-      addToast(response.message, "error", 5000)
     }
   }
 
@@ -100,11 +104,11 @@ export default function LoginPage() {
       if(requestChallengeResponse.success) {
 
         if(requestChallengeResponse.data === undefined) {
-          addToast("Server Error. Please, Try again!", "error", 5000)
-          throw new Error("data not received from server")
+          throw new Error("Server Error!")
         }
 
         const deviceSignature = await signDevice(requestChallengeResponse.data.nonce, userData.device_privk)
+        console.log(deviceSignature)
         const identitySignature = await signIdentity(requestChallengeResponse.data.nonce, formData.password, userData.ciphertext, userData.iv, userData.salt)
 
         const verifyChallengeResponse = await verifyChallenge(
@@ -116,19 +120,25 @@ export default function LoginPage() {
 
         if(verifyChallengeResponse.success) {
           // complete this
-          //auth.refreshUser()
-          //addToast("Logged in! Redirecting ...", "success")
-          //setTimeout(() => navigate("/"), 3000)
-          console.log(verifyChallengeResponse)
+          await auth.refreshUser()
+          addToast("Logged in! Redirecting ...", "success")
+          setTimeout(() => navigate("/"), 3000)
         } else {
+          console.log(verifyChallengeResponse)
           handleServerErrors(verifyChallengeResponse)
         }
 
       } else {
         handleServerErrors(requestChallengeResponse)
       }
-    } catch(e) {
-      console.error("Unknown Error: ", e)
+    } catch(e: any) {
+      if(e.message === "INVALID_PASSWORD") {
+        setUsernameError(" ")
+        setPasswordError("Invalid Credentials")
+      } else {
+        console.error("Unknown Error: ", e)
+        addToast("Something went wrong", "error", 5000)
+      }
     } finally {
       setLoading(false)
     }

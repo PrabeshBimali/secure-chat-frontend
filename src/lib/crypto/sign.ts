@@ -21,6 +21,7 @@ export async function signDevice(nonceHex: string, privateKey: CryptoKey): Promi
 
 
 export async function signIdentity(nonceHex: string, password: string, cipherText: Uint8Array, iv: Uint8Array, salt: Uint8Array): Promise<string> {
+  try{
   const nonceBytes = hexToBytes(nonceHex)
   const rawStorageKey = await generateStorageKey(password, salt)
 
@@ -47,4 +48,12 @@ export async function signIdentity(nonceHex: string, password: string, cipherTex
   const signatureHex = bytesToHex(rawSignature)
 
   return signatureHex
+
+  } catch(e) {
+    if(e instanceof DOMException && e.name === "OperationError") {
+      throw new Error("INVALID_PASSWORD")
+    }
+
+    throw e
+  }
 }

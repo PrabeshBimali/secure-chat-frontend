@@ -33,8 +33,8 @@ export default function VerifySeedPhrase(props: VerifySeedPhraseProps) {
   }
 
   const isVerified = targetIndices.every((index) => { 
-                                            return inputWords[index]?.trim().toLowerCase() === seedPhrase[index]?.toLowerCase()
-                                          })
+    return inputWords[index]?.trim().toLowerCase() === seedPhrase[index]?.toLowerCase()
+  })
 
   return (
     <div className="text-text-primary flex flex-col gap-3">

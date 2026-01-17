@@ -1,15 +1,9 @@
 import React, { createContext, useContext, useState, useEffect } from "react"
+import type { HTTPResponse } from "../types/global.interfaces"
 
 export interface UserInfo {
   userId: number
   username: string
-}
-
-interface MeResponse<T> {
-  success: boolean,
-  message: string,
-  field?: string,
-  data?: T
 }
 
 interface AuthContextType {
@@ -37,7 +31,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (!rawResponse.ok) throw new Error("Not authenticated")
 
-      const response: MeResponse<UserInfo> = await rawResponse.json()
+      const response: HTTPResponse<UserInfo> = await rawResponse.json()
       setUser(response.data)
       setIsAuthenticated(true)
 

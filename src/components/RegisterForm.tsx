@@ -83,12 +83,16 @@ export default function RegisterForm(props: RegisterFormProps) {
   }
 
   function handleServerErrors(response: any) {
+    // response.details undefined means Internal server error
+    if(response.details === undefined) {
+      addToast(response.message, "error", 5000)
+      return
+    }
+
     if(response.details.fieldErrors.username) {
       setUsernameError(response.details.fieldErrors.username)
     } else if(response.details.fieldErrors.email) {
       setEmailError(response.details.fieldErrors.email)
-    } else {
-      addToast(response.message, "error")
     }
   }
 
