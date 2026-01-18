@@ -7,7 +7,7 @@ import { useToast } from "../context/ToastProvider";
 import { useNavigate } from "react-router";
 import { getIdentity, initializeDb } from "../db/indexedb";
 import { requestChallenge, verifyChallenge } from "../services/authServices";
-import { signDevice, signIdentity } from "../lib/crypto/sign";
+import { signDevice, signIdentityWithPassword } from "../lib/crypto/sign";
 
 interface LoginFormData {
   username: string;
@@ -76,6 +76,8 @@ export default function LoginPage() {
     } else if(response.details.fieldErrors.device) {
       setUsernameError(" ")
       setPasswordError(response.details.fieldErrors.device)
+    } else {
+      addToast("Some Error has occured!", "error", 5000)
     }
   }
 
@@ -107,9 +109,8 @@ export default function LoginPage() {
           throw new Error("Server Error!")
         }
 
-        const deviceSignature = await signDevice(requestChallengeResponse.data.nonce, userData.device_privk)
-        console.log(deviceSignature)
-        const identitySignature = await signIdentity(requestChallengeResponse.data.nonce, formData.password, userData.ciphertext, userData.iv, userData.salt)
+        const deviceSignature = await signDevice(requestChallengeResponse.data.deviceNonce, userData.device_privk)
+        const identitySignature = await signIdentityWithPassword(requestChallengeResponse.data.identityNonce, formData.password, userData.ciphertext, userData.iv, userData.salt)
 
         const verifyChallengeResponse = await verifyChallenge(
           requestChallengeResponse.data.userid, 

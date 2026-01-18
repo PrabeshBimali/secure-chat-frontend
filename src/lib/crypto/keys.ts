@@ -35,12 +35,10 @@ export async function derivePrivateKeysFromSeed(seed: Uint8Array): Promise<Deriv
   }
 }
 
-export async function derivePublicKeys(seed: Uint8Array): Promise<MasterPublicKeys> {
+export async function derivePublicKeys(identityPrivateKey: Uint8Array, encryptionPrivateKey: Uint8Array): Promise<MasterPublicKeys> {
 
-  const keys = await derivePrivateKeysFromSeed(seed)
-
-  const identityPublicKey = ed25519.getPublicKey(keys.identityKey)
-  const encryptionPublicKey = x25519.getPublicKey(keys.encryptionKey)
+  const identityPublicKey = ed25519.getPublicKey(identityPrivateKey)
+  const encryptionPublicKey = x25519.getPublicKey(encryptionPrivateKey)
 
   return {
     identityPublicKey,

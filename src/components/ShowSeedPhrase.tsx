@@ -38,7 +38,7 @@ export default function ShowSeedPhrase(props: ShowSeedPhraseProps) {
                 value={`${index + 1}. ${word}`} 
                 key={index}
                 readOnly
-                className={`bg-white dark:bg-gray-800 cursor-default text-text-primary text-center tracking-wide focus:outline-none rounded-lg px-4 py-3
+                className={`bg-white dark:bg-gray-800 cursor-default text-text-primary text-left tracking-wide focus:outline-none rounded-lg px-4 py-3
                             border-1 border-gray-300 dark:border-gray-600 select-none`}
               />
             )

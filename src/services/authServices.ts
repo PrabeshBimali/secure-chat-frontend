@@ -4,12 +4,14 @@ const API_URL = `${import.meta.env.VITE_API_URL}`
 
 interface RequestChallengeResponse {
   userid: number
-  nonce: string
+  deviceNonce: string
+  identityNonce: string
 }
 
 //temporary
 interface VerifyChallengeResponse {
-  userid: string
+  userid: number
+  username: string
 }
 
 interface RegisterResponse {
@@ -18,7 +20,13 @@ interface RegisterResponse {
   username: string;
 }
 
-interface DeviceRegistration {
+interface RequestRecoveryChallengeResponse {
+  userid: number
+  username: string
+  nonce: string
+}
+
+export interface DeviceRegistration {
   name: string
   browser: string
   os: string
@@ -89,3 +97,43 @@ export async function verifyChallenge(userid: number, device_pbk: string, device
 
   return response
 } 
+
+export async function requestRecoveryChallenge(identity_pbk: string): Promise<HTTPResponse<RequestRecoveryChallengeResponse>> {
+  const payload = {
+    identity_pbk
+  }
+
+  const rawResponse = await fetch(`${API_URL}/auth/recovery/request`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    credentials: "include",
+    body: JSON.stringify(payload)
+  })
+
+  const response: HTTPResponse<RequestRecoveryChallengeResponse> = await rawResponse.json()
+
+  return response
+}
+
+export async function verifyRecoveryChallenge(userid: number, signature: string,  device: DeviceRegistration): Promise<HTTPResponse<VerifyChallengeResponse>> {
+  const payload = {
+    userid,
+    signature,
+    device
+  }
+
+  const rawResponse = await fetch(`${API_URL}/auth/recovery/verify`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    credentials: "include",
+    body: JSON.stringify(payload)
+  })
+
+  const response: HTTPResponse<VerifyChallengeResponse> = await rawResponse.json()
+
+  return response
+}

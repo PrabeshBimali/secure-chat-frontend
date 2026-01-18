@@ -4,7 +4,7 @@ import { validateEmail, validatePassword, validateUsername } from "../lib/utils/
 import { useToast } from "../context/ToastProvider";
 import { useNavigate } from "react-router";
 import { generateSeed } from "../lib/crypto/bip39";
-import { derivePublicKeys, generateDeviceIdKeys } from "../lib/crypto/keys";
+import { derivePrivateKeysFromSeed, derivePublicKeys, generateDeviceIdKeys } from "../lib/crypto/keys";
 import { bytesToHex } from "@noble/curves/utils.js";
 import getDeviceInfo from "../lib/utils/device";
 import { encryptMasterSeed } from "../lib/crypto/vault";
@@ -93,6 +93,8 @@ export default function RegisterForm(props: RegisterFormProps) {
       setUsernameError(response.details.fieldErrors.username)
     } else if(response.details.fieldErrors.email) {
       setEmailError(response.details.fieldErrors.email)
+    } else {
+      addToast("Some Error has occured!", "error", 5000)
     }
   }
 
@@ -107,7 +109,8 @@ export default function RegisterForm(props: RegisterFormProps) {
       }
 
       const masterSeed = await generateSeed(rawPhrase)
-      const publicKeys = await derivePublicKeys(masterSeed)
+      const privateKeys = await derivePrivateKeysFromSeed(masterSeed)
+      const publicKeys = await derivePublicKeys(privateKeys.identityKey, privateKeys.encryptionKey)
       const identityPublicKey = bytesToHex(publicKeys.identityPublicKey)
       const encryptionPublicKey = bytesToHex(publicKeys.encryptionPublicKey)
       const deviceInfo = getDeviceInfo()

@@ -8,7 +8,7 @@ import SendEmailVerification from './pages/SendEmailVerification'
 import VerifyEmail from './pages/VerifyEmail'
 import PrivateRoutes from './components/PrivateRoutes'
 import { AuthProvider } from './context/AuthProvider'
-import LoginWithSeed from './pages/LoginWithSeed'
+import RecoverWithSeed from './pages/RecoverWithSeed'
 
 function App() {
 
@@ -25,7 +25,7 @@ function App() {
               <Route path="/register" element={<RegisterPage/>}/>
               <Route path="/email-verification-sent" element={<SendEmailVerification/>}/>
               <Route path="/verify-email" element={<VerifyEmail/>}/>
-              <Route path="/login-seed" element={<LoginWithSeed/>}/>
+              <Route path="/login-seed" element={<RecoverWithSeed/>}/>
             </Routes>
           </BrowserRouter>
         </ToastProvider>

@@ -1,13 +1,26 @@
 import { useEffect, useState } from "react"
 import PrimaryButton from "./PrimaryButton"
 import { generateSeed } from "../lib/crypto/bip39"
+import { derivePrivateKeysFromSeed, derivePublicKeys, generateDeviceIdKeys } from "../lib/crypto/keys"
+import { requestRecoveryChallenge, verifyRecoveryChallenge, type DeviceRegistration } from "../services/authServices"
+import { bytesToHex } from "@noble/curves/utils.js"
+import { useToast } from "../context/ToastProvider"
+import { signIdentity } from "../lib/crypto/sign"
+import getDeviceInfo from "../lib/utils/device"
 
-export default function SeedLoginForm() {
+interface RecoveryFormProps {
+  onRecoverySuccess: (masterSeed: Uint8Array, device_privk: CryptoKey, device_pbk: string, username: string) => void
+}
+
+export default function RecoveryForm(props: RecoveryFormProps) {
+
+  const { onRecoverySuccess } = props
 
   const emptyArr = new Array(12).fill("")
   const [loading, setLoading] = useState(false)
   const [inputWords, setInputWords] = useState<Array<string>>(emptyArr)
   const [formError, setFormError] = useState<string>("")
+  const { addToast } = useToast()
 
   useEffect(() => {
     console.log(inputWords)
@@ -46,6 +59,20 @@ export default function SeedLoginForm() {
     return sanitizedArr.join(" ")
   }
 
+  function handleServerErrors(response: any) {
+
+    if(response.details === undefined) {
+      addToast(response.message, "error", 5000)
+      return
+    }
+
+    if(response.details.fieldErrors.credentials) {
+      setFormError(response.details.fieldErrors.credentials)
+    } else {
+      addToast("Some Error has occured!", "error", 5000)
+    }
+  }
+
   async function handleLogin() {
     setLoading(true)
     setFormError("")
@@ -55,6 +82,46 @@ export default function SeedLoginForm() {
       if(mnemonic === null) return
 
       const masterSeed = await generateSeed(mnemonic)
+      const privateKeys = await derivePrivateKeysFromSeed(masterSeed)
+      const publicKeys = await derivePublicKeys(privateKeys.identityKey, privateKeys.encryptionKey)
+      const identity_pbk = bytesToHex(publicKeys.identityPublicKey)
+
+      const requestChallengeRes = await requestRecoveryChallenge(identity_pbk)
+
+      if(requestChallengeRes.success) {
+
+        if(requestChallengeRes.data === undefined) {
+          addToast("Some Error has occured", "error", 5000)
+          return
+        }
+
+        const { nonce, userid, username } = requestChallengeRes.data
+        const signature = signIdentity(nonce, privateKeys.identityKey)
+        
+        const deviceKeys = await generateDeviceIdKeys()
+        const {name, os, browser} = getDeviceInfo()
+        const devicePublicKey = await crypto.subtle.exportKey("raw", deviceKeys.publicKey)
+        const devicePublicKeyHex = bytesToHex(new Uint8Array(devicePublicKey))
+
+        const device: DeviceRegistration = {
+          name,
+          os,
+          browser,
+          device_pbk: devicePublicKeyHex
+        }
+
+        const verifyChallengeRes = await verifyRecoveryChallenge(userid, signature, device)
+
+        if(verifyChallengeRes.success) {
+          // save device
+          onRecoverySuccess(masterSeed, deviceKeys.privateKey, devicePublicKeyHex, username)
+        } else {
+          handleServerErrors(verifyChallengeRes)
+        }
+
+      } else {
+          handleServerErrors(requestChallengeRes)
+      }
 
     } catch(e) {
       console.error(e)
