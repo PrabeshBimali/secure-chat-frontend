@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react"
-import PrimaryButton from "./PrimaryButton"
-import { generateSeed } from "../lib/crypto/bip39"
-import { derivePrivateKeysFromSeed, derivePublicKeys, generateDeviceIdKeys } from "../lib/crypto/keys"
-import { requestRecoveryChallenge, verifyRecoveryChallenge, type DeviceRegistration } from "../services/authServices"
+import PrimaryButton from "../../../components/PrimaryButton"
+import { generateSeed } from "../../../lib/crypto/bip39"
+import { derivePrivateKeysFromSeed, derivePublicKeys, generateDeviceIdKeys } from "../../../lib/crypto/keys"
+import { requestRecoveryChallenge, verifyRecoveryChallenge, type DeviceRegistration } from "../../../services/authServices"
 import { bytesToHex } from "@noble/curves/utils.js"
-import { useToast } from "../context/ToastProvider"
-import { signIdentity } from "../lib/crypto/sign"
-import getDeviceInfo from "../lib/utils/device"
+import { useToast } from "../../../context/ToastProvider"
+import { signIdentity } from "../../../lib/crypto/sign"
+import getDeviceInfo from "../../../lib/utils/device"
 
 interface RecoveryFormProps {
   onRecoverySuccess: (masterSeed: Uint8Array, device_privk: CryptoKey, device_pbk: string, username: string) => void
@@ -114,6 +114,7 @@ export default function RecoveryForm(props: RecoveryFormProps) {
 
         if(verifyChallengeRes.success) {
           // save device
+          addToast("Recovery Successful", "success", 3000)
           onRecoverySuccess(masterSeed, deviceKeys.privateKey, devicePublicKeyHex, username)
         } else {
           handleServerErrors(verifyChallengeRes)

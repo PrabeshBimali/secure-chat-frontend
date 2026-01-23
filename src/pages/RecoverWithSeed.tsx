@@ -1,7 +1,7 @@
 import { useState } from "react";
-import RecoveryForm from "../components/RecoveryForm";
+import RecoveryForm from "../features/auth/components/RecoveryForm";
 import AuthLayout from "../layouts/AuthLayout";
-import CreateVaultOnRecovery from "../components/CreateVaultOnRecovery";
+import CreateVaultOnRecovery from "../features/auth/components/CreateVaultOnRecovery";
 
 export default function RecoverWithSeed() {
 
@@ -28,7 +28,12 @@ export default function RecoverWithSeed() {
       }
 
       {step === 2 && 
-        <CreateVaultOnRecovery/>
+        <CreateVaultOnRecovery
+          masterSeed={seed}
+          devicePrivk={devicePrivk}
+          devicePbk={devicePbk}
+          username={uname}
+        />
       }
     </AuthLayout>
   )

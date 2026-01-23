@@ -1,7 +1,7 @@
 import { FaCopy } from "react-icons/fa";
-import PrimaryButton from "./PrimaryButton";
+import PrimaryButton from "../../../components/PrimaryButton";
 import { useState } from "react";
-import { useToast } from "../context/ToastProvider";
+import { useToast } from "../../../context/ToastProvider";
 
 interface ShowSeedPhraseProps {
   rawPhrase: string

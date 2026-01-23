@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import PrimaryButton from "./PrimaryButton";
+import PrimaryButton from "../../../components/PrimaryButton";
 
 interface VerifySeedPhraseProps {
   seedPhrase: string[]

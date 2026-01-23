@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
-import ShowSeedPhrase from "../components/ShowSeedPhrase";
+import ShowSeedPhrase from "../features/auth/components/ShowSeedPhrase";
 import AuthLayout from "../layouts/AuthLayout";
-import VerifySeedPhrase from "../components/VerifySeedPhrase";
+import VerifySeedPhrase from "../features/auth/components/VerifySeedPhrase";
 import { generateMnemonics } from "../lib/crypto/bip39";
-import RegisterForm from "../components/RegisterForm";
+import RegisterForm from "../features/auth/components/RegisterForm";
 
 export default function RegisterPage() {
 

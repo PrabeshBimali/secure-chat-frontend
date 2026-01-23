@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState, useEffect } from "react"
 import type { HTTPResponse } from "../types/global.interfaces"
 
 export interface UserInfo {
-  userId: number
+  userid: number
   username: string
 }
 

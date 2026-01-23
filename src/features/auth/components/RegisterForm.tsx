@@ -1,15 +1,15 @@
 import { useState } from "react";
-import PrimaryButton from "../components/PrimaryButton";
-import { validateEmail, validatePassword, validateUsername } from "../lib/utils/formValidation";
-import { useToast } from "../context/ToastProvider";
+import PrimaryButton from "../../../components/PrimaryButton";
+import { validateEmail, validatePassword, validateUsername } from "../../../lib/utils/formValidation";
+import { useToast } from "../../../context/ToastProvider";
 import { useNavigate } from "react-router";
-import { generateSeed } from "../lib/crypto/bip39";
-import { derivePrivateKeysFromSeed, derivePublicKeys, generateDeviceIdKeys } from "../lib/crypto/keys";
+import { generateSeed } from "../../../lib/crypto/bip39";
+import { derivePrivateKeysFromSeed, derivePublicKeys, generateDeviceIdKeys } from "../../../lib/crypto/keys";
 import { bytesToHex } from "@noble/curves/utils.js";
-import getDeviceInfo from "../lib/utils/device";
-import { encryptMasterSeed } from "../lib/crypto/vault";
-import { initializeDb, saveIdentity, type LocalVault } from "../db/indexedb";
-import { register, type RegistrationPayload } from "../services/authServices";
+import getDeviceInfo from "../../../lib/utils/device";
+import { encryptMasterSeed } from "../../../lib/crypto/vault";
+import { initializeDb, saveIdentity, type LocalVault } from "../../../db/indexedb";
+import { register, type RegistrationPayload } from "../../../services/authServices";
 
 export interface BasicRegistration {
   username: string;

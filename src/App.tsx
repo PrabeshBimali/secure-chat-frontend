@@ -25,7 +25,7 @@ function App() {
               <Route path="/register" element={<RegisterPage/>}/>
               <Route path="/email-verification-sent" element={<SendEmailVerification/>}/>
               <Route path="/verify-email" element={<VerifyEmail/>}/>
-              <Route path="/login-seed" element={<RecoverWithSeed/>}/>
+              <Route path="/recover-account" element={<RecoverWithSeed/>}/>
             </Routes>
           </BrowserRouter>
         </ToastProvider>
