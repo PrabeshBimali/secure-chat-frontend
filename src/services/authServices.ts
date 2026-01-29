@@ -42,7 +42,7 @@ export interface RegistrationPayload {
 }
 
 export async function register(payload: RegistrationPayload): Promise<HTTPResponse<RegisterResponse>> {
-  const rawResponse = await fetch(`${import.meta.env.VITE_API_URL}/auth/register`, {
+  const rawResponse = await fetch(`${API_URL}/auth/register`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

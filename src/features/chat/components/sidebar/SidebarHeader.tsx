@@ -1,4 +1,5 @@
-import { IoAdd, IoSearchOutline, IoEllipsisVertical } from "react-icons/io5";
+import { IoAdd, IoEllipsisVertical } from "react-icons/io5";
+import SidebarSearch from "./SidebarSearch";
 
 export default function SidebarHeader() {
   return (
@@ -19,17 +20,7 @@ export default function SidebarHeader() {
           </button>
         </div>
       </div>
-
-      <div className="px-4 pb-4">
-        <div className="relative group">
-          <IoSearchOutline className="absolute left-3 top-1/2 -translate-y-1/2 text-bg-tertiary group-focus-within:text-text-primary transition-colors" size={18} />
-          <input 
-            type="text" 
-            placeholder="Search" 
-            className="w-full bg-bg-secondary/60 border border-transparent focus:border-bg-tertiary/30 py-2 pl-10 pr-4 rounded-full focus:outline-none transition-all placeholder:text-bg-tertiary"
-          />
-        </div>
-      </div>
+      <SidebarSearch/>
     </div>
   )
 }
