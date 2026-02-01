@@ -23,14 +23,14 @@ export default function SidebarSearch() {
     const controller = new AbortController()
     const signal = controller.signal
 
-    const fetchUser = async (searchTerm: string) => {
+    const fetchUser = async () => {
       try{
 
         if(user === undefined) {
           refreshUser()
           return
         }
-        const rawUsers =  await searchUser(user.userid, searchTerm, signal)
+        const rawUsers =  await searchUser(user.userid, debouncedUserSearch, signal)
 
         if(!rawUsers.success) {
           throw new Error(rawUsers.message)
@@ -55,7 +55,7 @@ export default function SidebarSearch() {
       }
     }
     
-    fetchUser(debouncedUserSearch)
+    fetchUser()
 
     return () => controller.abort()
     

@@ -25,7 +25,6 @@ export async function searchUser(userid: number, searchTerm: string, signal: Abo
     userid: userid,
     usernamePattern: searchTerm
   }
-  console.log(payload)
 
   const rawResponse = await fetch(`${API_URL}/users/search`, {
     signal: signal,
@@ -40,4 +39,12 @@ export async function searchUser(userid: number, searchTerm: string, signal: Abo
   const response: HTTPResponse<Array<SearchUserResponse>> = await rawResponse.json()
 
   return response
+}
+
+export async function getChatContext(userid: number, signal: AbortSignal) {
+  const rawResponse = await fetch(`${API_URL}/chat/${userid}`, {
+    signal: signal,
+    method: "GET",
+    credentials: "include"
+  });
 }

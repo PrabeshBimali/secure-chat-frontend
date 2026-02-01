@@ -120,7 +120,6 @@ export default function LoginPage() {
         )
 
         if(verifyChallengeResponse.success) {
-          // complete this
           await auth.refreshUser()
           addToast("Logged in! Redirecting ...", "success")
           setTimeout(() => navigate("/"), 3000)

@@ -1,10 +1,12 @@
 import { IoSend } from "react-icons/io5";
 import { useSidebarSearch } from "../../context/SidebarSearchContext";
-import { UserRelationshipStatus, type UserRelationshipStatusType } from "../../services/chatServices";
+import { UserRelationshipStatus, type SearchUserResponse, type UserRelationshipStatusType } from "../../services/chatServices";
+import { useActiveChat } from "../../context/ActiveChatProvider";
 
 export default function UserSearchList() {
 
   const { isSearching, searchResults } = useSidebarSearch()
+  const { setSelectedUser } = useActiveChat()
 
   function statusMessageMapping(status: UserRelationshipStatusType) {
     switch(status) {
@@ -26,6 +28,10 @@ export default function UserSearchList() {
       case UserRelationshipStatus.YOU_BLOCKED:
         return "You blocked this user"
     }
+  }
+  
+  function userClicked(user: SearchUserResponse) {
+    setSelectedUser(user)
   }
 
   if (isSearching) {
@@ -54,6 +60,7 @@ export default function UserSearchList() {
       {searchResults.map((user) => (
         <div 
           key={user.id} 
+          onClick={() => userClicked(user)}
           className="flex items-center gap-3 px-4 py-3 hover:bg-bg-secondary/50 cursor-pointer transition-colors group"
         >
           <div className="w-12 h-12 rounded-full bg-bg-tertiary/20 flex items-center justify-center font-bold text-text-secondary flex-shrink-0 border border-bg-tertiary/10">

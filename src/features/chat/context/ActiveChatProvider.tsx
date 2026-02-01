@@ -4,7 +4,7 @@ import { type UserRelationshipStatusType } from '../services/chatServices';
 interface SelectedUser {
   id: number;
   username: string;
-  frienddshipStatus: UserRelationshipStatusType;
+  friendshipStatus: UserRelationshipStatusType;
 }
 
 interface ChatContextType {
@@ -14,7 +14,7 @@ interface ChatContextType {
 
 const ChatContext = createContext<ChatContextType | undefined>(undefined)
 
-export function ChatProvider({ children }: { children: React.ReactNode }): React.ReactElement {
+export function ActiveChatProvider({ children }: { children: React.ReactNode }): React.ReactElement {
   const [selectedUser, setSelectedUser] = useState<SelectedUser | null>(null)
 
   return (
@@ -24,7 +24,7 @@ export function ChatProvider({ children }: { children: React.ReactNode }): React
   )
 }
 
-export const useChat = () => {
+export const useActiveChat = () => {
   const context = useContext(ChatContext);
   if (!context) throw new Error("useChat must be used within a ChatProvider");
   return context;
