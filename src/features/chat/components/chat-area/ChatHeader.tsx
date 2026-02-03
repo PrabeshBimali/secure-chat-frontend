@@ -1,9 +1,9 @@
 import { IoSearchOutline, IoEllipsisVertical, IoShieldCheckmark } from "react-icons/io5"
-import { useActiveChat } from "../../context/ActiveChatProvider"
+import { useSelectedUserForChat } from "../../context/SelectedUserForChatProvider"
 
 export default function ChatHeader() {
 
-  const { selectedUser } = useActiveChat()
+  const { selectedUser } = useSelectedUserForChat()
 
   if(!selectedUser) {
     return

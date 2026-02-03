@@ -19,6 +19,25 @@ export interface SearchUserResponse {
   friendshipStatus: UserRelationshipStatusType
 }
 
+export interface MessageDetail {
+  id: string
+  ciphertext: string
+  iv: string
+  isEdited: string
+  status: "sent" | "delivered" | "read"
+  createdAt: Date
+  senderId: number
+  replyId: string
+}
+
+interface RecentChatHistoryResponse {
+  id: number
+  username: string
+  friendshipStatus: UserRelationshipStatusType
+  roomid: string
+  messsages: Array<MessageDetail>
+}
+
 export async function searchUser(userid: number, searchTerm: string, signal: AbortSignal): Promise<HTTPResponse<Array<SearchUserResponse>>> {
 
   const payload = {
@@ -41,10 +60,14 @@ export async function searchUser(userid: number, searchTerm: string, signal: Abo
   return response
 }
 
-export async function getChatContext(userid: number, signal: AbortSignal) {
+export async function getRecentChatHistory(userid: number, signal: AbortSignal): Promise<HTTPResponse<RecentChatHistoryResponse>> {
   const rawResponse = await fetch(`${API_URL}/chat/${userid}`, {
     signal: signal,
     method: "GET",
     credentials: "include"
   });
+
+  const response: HTTPResponse<RecentChatHistoryResponse> = await rawResponse.json()
+
+  return response
 }

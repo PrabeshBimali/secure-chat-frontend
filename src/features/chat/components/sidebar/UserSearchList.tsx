@@ -1,12 +1,12 @@
 import { IoSend } from "react-icons/io5";
 import { useSidebarSearch } from "../../context/SidebarSearchContext";
 import { UserRelationshipStatus, type SearchUserResponse, type UserRelationshipStatusType } from "../../services/chatServices";
-import { useActiveChat } from "../../context/ActiveChatProvider";
+import { useSelectedUserForChat } from "../../context/SelectedUserForChatProvider";
 
 export default function UserSearchList() {
 
   const { isSearching, searchResults } = useSidebarSearch()
-  const { setSelectedUser } = useActiveChat()
+  const { setSelectedUser } = useSelectedUserForChat()
 
   function statusMessageMapping(status: UserRelationshipStatusType) {
     switch(status) {

@@ -12,20 +12,20 @@ interface ChatContextType {
   setSelectedUser: (user: SelectedUser | null) => void;
 }
 
-const ChatContext = createContext<ChatContextType | undefined>(undefined)
+const SelectedUserForChatContext = createContext<ChatContextType | undefined>(undefined)
 
 export function ActiveChatProvider({ children }: { children: React.ReactNode }): React.ReactElement {
   const [selectedUser, setSelectedUser] = useState<SelectedUser | null>(null)
 
   return (
-    <ChatContext.Provider value={{selectedUser, setSelectedUser}}>
+    <SelectedUserForChatContext.Provider value={{selectedUser, setSelectedUser}}>
       {children}
-    </ChatContext.Provider>
+    </SelectedUserForChatContext.Provider>
   )
 }
 
-export const useActiveChat = () => {
-  const context = useContext(ChatContext);
+export const useSelectedUserForChat = () => {
+  const context = useContext(SelectedUserForChatContext);
   if (!context) throw new Error("useChat must be used within a ChatProvider");
   return context;
 };

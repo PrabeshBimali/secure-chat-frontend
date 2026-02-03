@@ -1,33 +1,15 @@
 import { IoShieldCheckmark, IoChatbubble } from "react-icons/io5"
-import { useActiveChat } from "../../context/ActiveChatProvider"
-import { useAuth } from "../../../../context/AuthProvider"
-import { useEffect } from "react"
-import { getChatContext } from "../../services/chatServices"
+import { useSelectedUserForChat } from "../../context/SelectedUserForChatProvider"
 
-export default function MessageList() {
-  const { selectedUser } = useActiveChat() 
-  const { user, refreshUser } = useAuth()
-  
-  useEffect(() => {
-    if(!selectedUser) {
-      return
-    }
+interface MessageListProps {
+  isMessagesLoading: boolean
+}
 
-    if(!user) {
-      refreshUser()
-      return
-    }
-    
-    const controller = new AbortController()
-    const signal = controller.signal
+export default function MessageList(props: MessageListProps) {
 
-    const fetchChatContext = async () => {
-      return await getChatContext(selectedUser.id, signal)
-    }
-    
-    fetchChatContext()
+  const { isMessagesLoading } = props
 
-  }, [selectedUser])
+  const { selectedUser } = useSelectedUserForChat() 
 
   if(!selectedUser) {
     return(
@@ -39,6 +21,15 @@ export default function MessageList() {
         <p className="text-sm opacity-60">Pick someone from the left to start a chat.</p>
       </div>
     )
+  }
+  
+  if (isMessagesLoading) {
+    return (
+      <div className="flex-1 flex flex-col items-center justify-center p-10 text-bg-tertiary">
+        <div className="w-8 h-8 border-4 border-t-blue-500 border-bg-secondary rounded-full animate-spin mb-4" />
+        <p className="text-sm font-medium">Messages are Loding...</p>
+      </div>
+    );
   }
 
   return (
