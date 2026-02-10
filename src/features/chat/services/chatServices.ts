@@ -23,11 +23,11 @@ export interface MessageDetail {
   id: string
   ciphertext: string
   iv: string
-  isEdited: string
+  isEdited: boolean
   status: "sent" | "delivered" | "read"
   createdAt: Date
   senderId: number
-  replyId: string
+  replyId: string | null
 }
 
 interface RecentChatHistoryResponse {
