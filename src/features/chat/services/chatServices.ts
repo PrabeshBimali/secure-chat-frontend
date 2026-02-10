@@ -33,6 +33,7 @@ export interface MessageDetail {
 interface RecentChatHistoryResponse {
   id: number
   username: string
+  publicKey: string
   friendshipStatus: UserRelationshipStatusType
   roomid: string
   messsages: Array<MessageDetail>

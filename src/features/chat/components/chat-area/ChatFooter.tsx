@@ -5,9 +5,10 @@ import { useState } from "react"
 
 interface ChatFooterProps {
   chatPartner: ChatPartner | null
+  onSendMesage: (text: string) => void
 }
 
-export default function ChatFooter({ chatPartner }: ChatFooterProps) {
+export default function ChatFooter({ chatPartner, onSendMesage }: ChatFooterProps) {
   const [message, setMessage] = useState("")
 
   if(!chatPartner) return null;
@@ -24,9 +25,9 @@ export default function ChatFooter({ chatPartner }: ChatFooterProps) {
     return <div className="p-4 text-center text-text-primary">Waiting for {chatPartner.username} to accept...</div>;
   }
 
-  if(chatPartner.friendshipStatus === UserRelationshipStatus.REQUEST_RECEIVED) {
+  //if(chatPartner.friendshipStatus === UserRelationshipStatus.REQUEST_RECEIVED) {
     // TODO we have to add some button
-  }
+  //}
 
   return (
     <div className="p-4 bg-bg-primary">
@@ -52,12 +53,13 @@ export default function ChatFooter({ chatPartner }: ChatFooterProps) {
 
         <button 
           onClick={() => {
+            onSendMesage(message)
             if (message.trim()) {
               setMessage("")
             }
           }}
           disabled={!message.trim()}
-          className="p-3 bg-bg-tertiary text-white rounded-full hover:brightness-110 active:scale-95 transition-all shadow-md disabled:opacity-50"
+          className="p-3 bg-bg-tertiary text-white rounded-full cursor-pointer hover:brightness-110 active:scale-95 transition-all shadow-md disabled:opacity-50"
         >
           <IoSend size={20} />
         </button>

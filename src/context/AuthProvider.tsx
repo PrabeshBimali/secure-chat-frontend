@@ -15,7 +15,7 @@ interface AuthContextType {
   refreshUser: () => Promise<void>
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined)
+const AuthContext = createContext<AuthContextType | null>(null)
 
 export function AuthProvider({children}: {children: React.ReactNode}): React.ReactElement {
   const [user, setUser] = useState<UserInfo | undefined>()

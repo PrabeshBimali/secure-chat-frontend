@@ -74,6 +74,15 @@ export default function ChatArea() {
     fetchChatContext()
 
   }, [selectedUser])
+
+  function handleSendMessage(text: string) {
+    if(selectedUser === null) {
+      //TODO Add some toast error
+      return
+    }
+
+  }
+
   return (
     <main className="hidden md:flex flex-1 flex-col bg-bg-secondary/20">
       <ChatHeader/>
@@ -82,6 +91,7 @@ export default function ChatArea() {
       />
       <ChatFooter
         chatPartner={chatPartner}
+        onSendMesage={handleSendMessage}
       />
     </main>
   )
