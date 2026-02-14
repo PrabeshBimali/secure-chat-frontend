@@ -1,4 +1,4 @@
-import type { HTTPResponse } from "../../../types/global.interfaces";
+import type { HTTPResponse } from "../types/global.interfaces";
 
 const API_URL = `${import.meta.env.VITE_API_URL}`
 

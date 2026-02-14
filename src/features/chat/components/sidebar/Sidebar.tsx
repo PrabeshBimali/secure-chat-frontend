@@ -1,7 +1,7 @@
 import { useState } from "react";
 import SidebarHeader from "./SidebarHeader";
 import UserSearchList from "./UserSearchList";
-import type { SearchUserResponse } from "../../services/chatServices";
+import type { SearchUserResponse } from "../../../../services/chatServices";
 import { SidebarSearchContext } from "../../context/SidebarSearchContext";
 import ConversationList from "./ConversationList";
 

@@ -71,3 +71,8 @@ The backend is "blind." During the connection handshake:
 - [ ] **Multi-Device Sync:** Handling key distribution across multiple authorized devices.
 
 ---
+
+## Possible Upgrades in Future
+- Perfect Forward Secrity
+- Device based jwt token, where we validate jwt is linked to device for each requireAuth requets (High computation cost, only for critical operations)
+- Sign msg with identity so server can be sure msg is from correct user.

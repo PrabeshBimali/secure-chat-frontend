@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import useDebounce from "../../../../hooks/useDebounce";
 import { IoSearchOutline } from "react-icons/io5"
-import { searchUser } from "../../services/chatServices";
+import { searchUser } from "../../../../services/chatServices";
 import { useAuth } from "../../../../context/AuthProvider";
 import { validateUsername } from "../../../../lib/utils/formValidation";
 import { useSidebarSearch } from "../../context/SidebarSearchContext";

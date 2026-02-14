@@ -1,5 +1,5 @@
 import React, { createContext, useContext } from "react";
-import type { SearchUserResponse } from "../services/chatServices";
+import type { SearchUserResponse } from "../../../services/chatServices";
 
 type SidebarSearchContextType = {
   searchResults: Array<SearchUserResponse>

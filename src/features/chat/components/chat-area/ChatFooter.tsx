@@ -1,5 +1,5 @@
 import { IoSend } from "react-icons/io5"
-import { UserRelationshipStatus } from "../../services/chatServices"
+import { UserRelationshipStatus } from "../../../../services/chatServices"
 import type { ChatPartner } from "./ChatArea"
 import { useState } from "react"
 

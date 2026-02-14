@@ -4,7 +4,7 @@ import ChatHeader from "./ChatHeader";
 import ChatFooter from "./ChatFooter";
 import MessageList from "./MessageList";
 import { useSelectedUserForChat } from "../../context/SelectedUserForChatProvider";
-import { getRecentChatHistory, type MessageDetail, type UserRelationshipStatusType } from "../../services/chatServices";
+import { getRecentChatHistory, type MessageDetail, type UserRelationshipStatusType } from "../../../../services/chatServices";
 
 export interface ChatPartner {
   id: number

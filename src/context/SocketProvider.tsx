@@ -4,15 +4,13 @@ import { useAuth } from './AuthProvider';
 
 interface SocketContextType {
   socket: Socket | null
-  onlineUsers: number[]
 }
 
 const SocketContext = createContext<SocketContextType | undefined>(undefined);
 
 export function SocketProvider({ children }: { children: React.ReactNode }): React.ReactElement {
-  const [socket, setSocket] = useState<Socket | null>(null)
-  const [onlineUsers, setOnlineUsers] = useState<number[]>([])
-  const { user } = useAuth(); 
+  const [ socket, setSocket ] = useState<Socket | null>(null)
+  const { user } = useAuth()
 
   useEffect(() => {
     if (user) {
@@ -25,13 +23,14 @@ export function SocketProvider({ children }: { children: React.ReactNode }): Rea
 
       setSocket(newSocket)
 
-      newSocket.on("getOnlineUsers", (users: number[]) => {
-        setOnlineUsers(users)
-      });
+      newSocket.on("connect_error", (err) => {
+        console.error("Error while connecting to socket", err)
+      })
 
       return () => {
+        newSocket.removeAllListeners()
         newSocket.close()
-      };
+      }
     } else {
       if (socket) {
         socket.close()
@@ -41,7 +40,7 @@ export function SocketProvider({ children }: { children: React.ReactNode }): Rea
   }, [user]);
 
   return (
-    <SocketContext.Provider value={{ socket, onlineUsers }}>
+    <SocketContext.Provider value={{ socket }}>
       {children}
     </SocketContext.Provider>
   );

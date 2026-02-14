@@ -1,6 +1,6 @@
 import { IoSend } from "react-icons/io5";
 import { useSidebarSearch } from "../../context/SidebarSearchContext";
-import { UserRelationshipStatus, type SearchUserResponse, type UserRelationshipStatusType } from "../../services/chatServices";
+import { UserRelationshipStatus, type SearchUserResponse, type UserRelationshipStatusType } from "../../../../services/chatServices";
 import { useSelectedUserForChat } from "../../context/SelectedUserForChatProvider";
 
 export default function UserSearchList() {

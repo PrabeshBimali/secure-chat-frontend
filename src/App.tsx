@@ -9,7 +9,7 @@ import VerifyEmail from './pages/VerifyEmail'
 import PrivateRoutes from './components/PrivateRoutes'
 import { AuthProvider } from './context/AuthProvider'
 import RecoverWithSeed from './pages/RecoverWithSeed'
-import { MessageEncryptionProvider } from './context/MessageEncryptionProvider'
+import SocketWrapper from './layouts/SocketWrapper'
 
 function App() {
 
@@ -17,11 +17,12 @@ function App() {
     <>
       <AuthProvider>
         <ToastProvider>
-          <MessageEncryptionProvider>
             <BrowserRouter>
               <Routes>
                 <Route element={<PrivateRoutes/>}>
-                  <Route path="/" element={<HomePage/>}/>
+                  <Route element={<SocketWrapper/>}>
+                    <Route path="/" element={<HomePage/>}/>
+                  </Route>
                 </Route>
                 <Route path='/login' element={<LoginPage/>}/>
                 <Route path="/register" element={<RegisterPage/>}/>
@@ -30,7 +31,6 @@ function App() {
                 <Route path="/recover-account" element={<RecoverWithSeed/>}/>
               </Routes>
             </BrowserRouter>
-          </MessageEncryptionProvider>
         </ToastProvider>
       </AuthProvider>
     </>

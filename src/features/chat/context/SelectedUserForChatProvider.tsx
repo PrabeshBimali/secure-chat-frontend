@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState } from 'react';
-import { type UserRelationshipStatusType } from '../services/chatServices';
+import { type UserRelationshipStatusType } from '../../../services/chatServices';
 
 interface SelectedUser {
   id: number;
