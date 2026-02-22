@@ -7,7 +7,10 @@ import { useToast } from "../context/ToastProvider";
 import { useNavigate } from "react-router";
 import { getIdentity, initializeDb } from "../db/indexedb";
 import { requestChallenge, verifyChallenge } from "../services/authServices";
-import { signDevice, signIdentityWithPassword } from "../lib/crypto/sign";
+import { signDevice, signIdentity } from "../lib/crypto/sign";
+import { privateKeyStore } from "../store/PrivateKeyStore";
+import { decryptMasterSeed } from "../lib/crypto/vault";
+import { derivePrivateKeysFromSeed } from "../lib/crypto/keys";
 
 interface LoginFormData {
   username: string;
@@ -110,7 +113,9 @@ export default function LoginPage() {
         }
 
         const deviceSignature = await signDevice(requestChallengeResponse.data.deviceNonce, userData.device_privk)
-        const identitySignature = await signIdentityWithPassword(requestChallengeResponse.data.identityNonce, formData.password, userData.ciphertext, userData.iv, userData.salt)
+        const masterSeed = await decryptMasterSeed(formData.password, userData.ciphertext, userData.iv, userData.salt)
+        const privateKeys = await derivePrivateKeysFromSeed(masterSeed)
+        const identitySignature = signIdentity(requestChallengeResponse.data.identityNonce, privateKeys.identityKey) 
 
         const verifyChallengeResponse = await verifyChallenge(
           requestChallengeResponse.data.userid, 
@@ -121,6 +126,7 @@ export default function LoginPage() {
 
         if(verifyChallengeResponse.success) {
           await auth.refreshUser()
+          privateKeyStore.setKey(privateKeys.encryptionKey)
           addToast("Logged in! Redirecting ...", "success")
           setTimeout(() => navigate("/"), 3000)
         } else {

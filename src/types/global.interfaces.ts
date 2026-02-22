@@ -14,3 +14,5 @@ export interface HTTPResponse<T> {
   details?: any
   data?: T
 }
+
+export type StoreListenerType = () => void

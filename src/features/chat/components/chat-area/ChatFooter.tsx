@@ -1,7 +1,7 @@
 import { IoSend } from "react-icons/io5"
 import { UserRelationshipStatus } from "../../../../services/chatServices"
-import type { ChatPartner } from "./ChatArea"
 import { useState } from "react"
+import type { ChatPartner } from "../../../../store/ActivePartnerStore"
 
 interface ChatFooterProps {
   chatPartner: ChatPartner | null
@@ -31,6 +31,14 @@ export default function ChatFooter({ chatPartner, onSendMesage }: ChatFooterProp
 
   return (
     <div className="p-4 bg-bg-primary">
+      {
+        /*TODO: We can make BlockButton component and move it there */
+        chatPartner.friendshipStatus === UserRelationshipStatus.REQUEST_RECEIVED 
+        && 
+        <div className="flex justify-center p-2">
+          <button className="bg-red-600 text-white cursor-pointer p-1 hover:bg-red-500 rounded-sm">Block</button>
+        </div>
+      }
       <div className="flex items-end gap-2 max-w-5xl mx-auto">
         <div className="flex-1 flex items-center bg-bg-secondary/50 border border-bg-tertiary/10 rounded-3xl px-4 py-2 shadow-inner">
           <textarea 
@@ -59,7 +67,7 @@ export default function ChatFooter({ chatPartner, onSendMesage }: ChatFooterProp
             }
           }}
           disabled={!message.trim()}
-          className="p-3 bg-bg-tertiary text-white rounded-full cursor-pointer hover:brightness-110 active:scale-95 transition-all shadow-md disabled:opacity-50"
+          className={`p-3 text-white rounded-full cursor-pointer hover:brightness-110 active:scale-95 transition-all shadow-md disabled:opacity-50 ${message.length > 0 ? "bg-blue-500": "bg-bg-tertiary"}`}
         >
           <IoSend size={20} />
         </button>

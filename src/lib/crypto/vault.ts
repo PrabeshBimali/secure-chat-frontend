@@ -35,5 +35,35 @@ export async function encryptMasterSeed(password: string, masterSeed: Uint8Array
     iv,
     salt
   }
+}
 
+export async function decryptMasterSeed(password: string, ciphertext: Uint8Array, iv: Uint8Array, salt: Uint8Array): Promise<Uint8Array> {
+  try {
+    const rawStorageKey = await generateStorageKey(password, salt)
+
+    const storageKey = await crypto.subtle.importKey(
+      "raw", 
+      rawStorageKey.buffer as ArrayBuffer, 
+      "AES-GCM", 
+      false, 
+      ["decrypt"]
+    );
+
+    const masterSeed = await crypto.subtle.decrypt(
+      {
+        name: "AES-GCM",
+        iv: iv.buffer as ArrayBuffer
+      },
+      storageKey,
+      ciphertext.buffer as ArrayBuffer
+    )
+
+    return new Uint8Array(masterSeed)
+  } catch(error) {
+    if(error instanceof DOMException && error.name === "OperationError") {
+      throw new Error("INVALID_PASSWORD")
+    }
+
+    throw error
+  }
 }

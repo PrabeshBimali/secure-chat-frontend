@@ -7,9 +7,6 @@ interface EncryptedMessagePackage {
 }
 
 export async function encryptMessage(text: string, encryptionKey: Uint8Array, partnerPublicKey: Uint8Array): Promise<EncryptedMessagePackage> {
-
-  if (!encryptionKey) throw new Error("Key not initialized")
-
   const sharedSecret = x25519.getSharedSecret(encryptionKey, partnerPublicKey)
 
   const cryptoKey = await crypto.subtle.importKey(
@@ -41,19 +38,7 @@ export async function encryptMessage(text: string, encryptionKey: Uint8Array, pa
 
 }
 
-export async function decryptMessage(ciphertext: string, iv: string, encryptionKey: Uint8Array, partnerPublicKey: Uint8Array): Promise<string> {
-  if (!encryptionKey) throw new Error("Key not initialized");
-
-  const sharedSecret = x25519.getSharedSecret(encryptionKey, partnerPublicKey)
-  
-  const cryptoKey = await crypto.subtle.importKey(
-    "raw", 
-    sharedSecret.buffer as ArrayBuffer, // shared sectret to encrypt
-    "AES-GCM", 
-    false, 
-    ["decrypt"]
-  )
-
+export async function decryptMessage(ciphertext: string, iv: string, sharedSecret: CryptoKey): Promise<string> {
   const cipherTextBytes = hexToBytes(ciphertext)
   const ivBytes = hexToBytes(iv)
   
@@ -62,7 +47,7 @@ export async function decryptMessage(ciphertext: string, iv: string, encryptionK
       name: "AES-GCM",
       iv: ivBytes.buffer as ArrayBuffer
     },
-    cryptoKey,
+    sharedSecret,
     cipherTextBytes.buffer as ArrayBuffer
   )
 

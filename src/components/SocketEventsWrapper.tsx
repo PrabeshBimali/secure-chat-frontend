@@ -7,9 +7,6 @@ export default function SocketEventsWrapper() {
 
   useEffect(() => {
     console.log("Wrapper Socket State:", socket?.id || "No Socket Yet");
-    socket?.on("message", () => {
-      console.log("Message received from server")
-    })
 
     return () => {
       socket?.off("message")
