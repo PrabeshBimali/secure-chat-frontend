@@ -4,12 +4,16 @@ export interface MessageDetailForUI {
   id: string
   message: string
   isEdited: boolean
-  status: "sending" | "sent" | "delivered" | "read" | "failed"
+  status: "sending" | "sent" | "delivered" | "read" | "fail"
   createdAt: Date
   senderId: number
   replyId: string | null
 }
 
+/*
+  We can use record for faster lookup when updating values
+  This can be done if there are many users and app feels sluggish
+*/
 class ActiveChatStore {
 
   state: Array<MessageDetailForUI>
@@ -41,6 +45,14 @@ class ActiveChatStore {
 
   addNewMessage = (messsagesDetail: MessageDetailForUI) => {
     this.state = [...this.state, messsagesDetail]
+    this.notifyAllListeners()
+  }
+
+  updateStatusAndId = (tempid: string, id: string, status: "sent" | "delivered" | "read" | "fail") => {
+    const updatedMessages = this.state.map((messageDetail) => {
+      return messageDetail.id === tempid ? {...messageDetail, status: status, id: id} : messageDetail
+    })
+    this.state = updatedMessages
     this.notifyAllListeners()
   }
 }

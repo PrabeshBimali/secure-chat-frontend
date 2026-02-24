@@ -67,11 +67,9 @@ export default function ChatArea() {
         if(encryptionKey === null) {
           throw Error("Encryption key not set")
         }
-        console.log(chatHistoryWithPartner.messages)
 
         const decryptedMessagesDetail = await decryptMessagesForUI(chatHistoryWithPartner.messages, encryptionKey, hexToBytes(chatHistoryWithPartner.publicKey))
         activeChatStore.setState(decryptedMessagesDetail)
-        console.log(activeChatStore.getSnapshot())
       } catch(error) {
         if(error instanceof DOMException && error.name === "AbortError") {
           return
@@ -135,13 +133,27 @@ export default function ChatArea() {
     }
 
     activeChatStore.addNewMessage(newMessage)
-    console.log(activeChatStore.getSnapshot())
+    
     try {
 
-      await sendMessage(activeChatPartner.id, encryptedData.ciphertext, encryptedData.iv)
+      const response = await sendMessage(activeChatPartner.id, encryptedData.ciphertext, encryptedData.iv)
+
+      if(!response.success) {
+        throw Error(response.message)
+      }
+
+      const messageData = response.data
+      console.log(messageData?.status)
+
+      // update if current active chat is the same user
+      if(messageData?.partnerId === activeChatPartner.id) {
+        activeChatStore.updateStatusAndId(tempUuid, messageData.messageId, messageData.status)
+      }
 
     } catch(error) {
-
+      console.error(error)
+      addToast("Fail to send Message", "error", 3000)
+      activeChatStore.updateStatusAndId(tempUuid, tempUuid, "fail")
     }
   }
 

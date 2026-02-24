@@ -1,7 +1,6 @@
 import { x25519 } from "@noble/curves/ed25519.js";
 import type { MessageDetailForUI } from "../store/ActiveChatStore";
 import type { HTTPResponse } from "../types/global.interfaces";
-import { hexToBytes } from "@noble/curves/utils.js";
 import { decryptMessage } from "../lib/crypto/msgEncDec";
 
 const API_URL = `${import.meta.env.VITE_API_URL}`
@@ -43,6 +42,12 @@ interface RecentChatHistoryResponse {
   messages: Array<MessageDetail>
 }
 
+interface SendMessageResponse {
+  messageId: string
+  status: "sent" | "delivered" | "read"
+  partnerId: number
+}
+
 export async function searchUser(userid: number, searchTerm: string, signal: AbortSignal): Promise<HTTPResponse<Array<SearchUserResponse>>> {
 
   const payload = {
@@ -77,7 +82,7 @@ export async function getRecentChatHistory(userid: number, signal: AbortSignal):
   return response
 }
 
-export async function sendMessage(partnerId: number, ciphertext: string, iv: string) {
+export async function sendMessage(partnerId: number, ciphertext: string, iv: string): Promise<HTTPResponse<SendMessageResponse>> {
 
   const payload = {
     partnerId, 
@@ -94,7 +99,8 @@ export async function sendMessage(partnerId: number, ciphertext: string, iv: str
     body: JSON.stringify(payload)
   })
 
-  const response = await rawResponse.json()
+  const response = await rawResponse.json() as HTTPResponse<SendMessageResponse>
+  return response
 }
 
 export async function decryptMessagesForUI(messages: Array<MessageDetail>, encryptionKey: Uint8Array, publicKey: Uint8Array): Promise<Array<MessageDetailForUI>> {
