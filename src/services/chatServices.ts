@@ -2,6 +2,7 @@ import { x25519 } from "@noble/curves/ed25519.js";
 import type { MessageDetailForUI } from "../store/ActiveChatStore";
 import type { HTTPResponse } from "../types/global.interfaces";
 import { decryptMessage } from "../lib/crypto/msgEncDec";
+import { formatDate } from "../lib/utils/dateFormatter";
 
 const API_URL = `${import.meta.env.VITE_API_URL}`
 
@@ -28,7 +29,7 @@ export interface MessageDetail {
   iv: string
   isEdited: boolean
   status: "sent" | "delivered" | "read"
-  createdAt: Date
+  createdAt: string
   senderId: number
   replyId: string | null
 }
@@ -46,6 +47,13 @@ interface SendMessageResponse {
   messageId: string
   status: "sent" | "delivered" | "read"
   partnerId: number
+}
+
+export interface ConversationData {
+  roomId: string
+  partnerId: number
+  partnerName: string
+  lastMessageAt: Date
 }
 
 export async function searchUser(userid: number, searchTerm: string, signal: AbortSignal): Promise<HTTPResponse<Array<SearchUserResponse>>> {
@@ -75,11 +83,21 @@ export async function getRecentChatHistory(userid: number, signal: AbortSignal):
     signal: signal,
     method: "GET",
     credentials: "include"
-  });
+  })
 
   const response: HTTPResponse<RecentChatHistoryResponse> = await rawResponse.json()
-
   return response
+}
+
+export async function getConversationList(signal: AbortSignal): Promise<HTTPResponse<Array<ConversationData>>> {
+  const rawResponse = await fetch(`${API_URL}/rooms/list`, {
+    signal: signal,
+    method: "GET",
+    credentials: "include"
+  })
+
+  const response = await rawResponse.json()
+  return response as HTTPResponse<Array<ConversationData>>
 }
 
 export async function sendMessage(partnerId: number, ciphertext: string, iv: string): Promise<HTTPResponse<SendMessageResponse>> {
@@ -122,7 +140,7 @@ export async function decryptMessagesForUI(messages: Array<MessageDetail>, encry
       message: decryptedMessage,
       isEdited: value.isEdited,
       status: value.status,
-      createdAt: value.createdAt,
+      createdAt: formatDate(value.createdAt),
       senderId: value.senderId,
       replyId: value.replyId
     }

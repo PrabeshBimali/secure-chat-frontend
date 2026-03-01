@@ -1,6 +1,6 @@
 import { IoChatbubble } from "react-icons/io5"
 import { useSelectedUserForChat } from "../../context/SelectedUserForChatProvider"
-import { useSyncExternalStore } from "react"
+import { useEffect, useRef, useSyncExternalStore } from "react"
 import { activeChatStore } from "../../../../store/ActiveChatStore"
 import MessageBox from "./MessageBox"
 
@@ -11,9 +11,22 @@ interface MessageListProps {
 export default function MessageList(props: MessageListProps) {
   const messages = useSyncExternalStore(activeChatStore.subscribe, activeChatStore.getSnapshot)
 
-  const { isMessagesLoading } = props
+  const messagesEndRef = useRef<HTMLDivElement>(null)
 
-  const { selectedUser } = useSelectedUserForChat() 
+  const { isMessagesLoading } = props
+  const { selectedUser } = useSelectedUserForChat()
+
+  /* 
+    TODO: This scroll logic scrolls back user to bottom even when they are reading chat history if new message is received
+    this should only be scrolled to bottom if they are close to it.
+  */
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+  
+  useEffect(() => {
+    scrollToBottom()
+  }, [messages])
 
   if(!selectedUser) {
     return(
@@ -31,18 +44,20 @@ export default function MessageList(props: MessageListProps) {
     return (
       <div className="flex-1 flex flex-col items-center justify-center p-10 text-bg-tertiary">
         <div className="w-8 h-8 border-4 border-t-blue-500 border-bg-secondary rounded-full animate-spin mb-4" />
-        <p className="text-sm font-medium">Messages are Loding...</p>
+        <p className="text-sm font-medium">Messages are Loading...</p>
       </div>
     );
   }
 
   return (
     <div className="flex-1 overflow-y-auto p-6 space-y-4 flex flex-col">
+      <div className="flex-1"/>
       {
-        messages.map((message, index) => {
-          return <MessageBox messageDetail={message} key={index}/>
+        messages.map((message) => {
+          return <MessageBox messageDetail={message} key={message.id}/>
         })
       }
+      <div ref={messagesEndRef}/>
     </div>
   )
 }

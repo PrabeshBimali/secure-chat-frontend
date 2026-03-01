@@ -33,7 +33,7 @@ export default function MessageBox(props: {messageDetail: MessageDetailForUI}) {
         <div className="bg-bg-primary border border-bg-tertiary/20 text-text-primary px-4 py-2 rounded-2xl rounded-tl-none shadow-sm text-[15px]">
           {messageDetail.message}
         </div>
-        <span className="text-[10px] text-bg-tertiary mt-1 ml-1 font-medium">10:12 AM</span>
+        <span className="text-[10px] text-bg-tertiary mt-1 ml-1 font-medium">{messageDetail.createdAt}</span>
       </div>
     )
   }
@@ -44,7 +44,7 @@ export default function MessageBox(props: {messageDetail: MessageDetailForUI}) {
         {messageDetail.message}
       </div>
       <div className="flex items-center gap-1 mt-1 mr-1">
-          <span className="text-[10px] text-bg-tertiary font-medium">10:32 AM</span>
+          <span className="text-[10px] text-bg-tertiary font-medium">{messageDetail.createdAt}</span>
           {chatStatusCheckmark(messageDetail.status)}
       </div>
     </div>

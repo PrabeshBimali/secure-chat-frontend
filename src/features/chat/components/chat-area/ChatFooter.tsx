@@ -25,10 +25,6 @@ export default function ChatFooter({ chatPartner, onSendMesage }: ChatFooterProp
     return <div className="p-4 text-center text-text-primary">Waiting for {chatPartner.username} to accept...</div>;
   }
 
-  //if(chatPartner.friendshipStatus === UserRelationshipStatus.REQUEST_RECEIVED) {
-    // TODO we have to add some button
-  //}
-
   return (
     <div className="p-4 bg-bg-primary">
       {

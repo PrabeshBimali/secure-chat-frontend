@@ -5,7 +5,7 @@ export interface MessageDetailForUI {
   message: string
   isEdited: boolean
   status: "sending" | "sent" | "delivered" | "read" | "fail"
-  createdAt: Date
+  createdAt: string
   senderId: number
   replyId: string | null
 }

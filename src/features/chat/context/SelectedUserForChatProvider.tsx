@@ -1,10 +1,10 @@
 import React, { createContext, useContext, useState } from 'react';
 import { type UserRelationshipStatusType } from '../../../services/chatServices';
 
-interface SelectedUser {
-  id: number;
-  username: string;
-  friendshipStatus: UserRelationshipStatusType;
+export interface SelectedUser {
+  id: number
+  username: string
+  friendshipStatus: UserRelationshipStatusType | null
 }
 
 interface ChatContextType {
