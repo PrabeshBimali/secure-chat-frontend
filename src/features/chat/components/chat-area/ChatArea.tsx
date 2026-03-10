@@ -4,13 +4,14 @@ import ChatHeader from "./ChatHeader";
 import ChatFooter from "./ChatFooter";
 import MessageList from "./MessageList";
 import { useSelectedUserForChat } from "../../context/SelectedUserForChatProvider";
-import { decryptMessagesForUI, getRecentChatHistory, sendMessage } from "../../../../services/chatServices";
+import { decryptMessagesForUI, decryptMessagesWorker, getRecentChatHistory, sendMessage } from "../../../../services/chatServices";
 import { useToast } from "../../../../context/ToastProvider";
 import { encryptMessage } from "../../../../lib/crypto/msgEncDec";
 import { privateKeyStore } from "../../../../store/PrivateKeyStore";
 import { hexToBytes } from "@noble/curves/utils.js";
 import { activeChatPartnerStore } from "../../../../store/ActivePartnerStore";
 import { activeChatStore, type MessageDetailForUI } from "../../../../store/ActiveChatStore";
+import { formatDate } from "../../../../lib/utils/dateFormatter";
 
 export default function ChatArea() {
   const MAX_CHAR_LIMIT = 1500
@@ -68,7 +69,7 @@ export default function ChatArea() {
           throw Error("Encryption key not set")
         }
 
-        const decryptedMessagesDetail = await decryptMessagesForUI(chatHistoryWithPartner.messages, encryptionKey, hexToBytes(chatHistoryWithPartner.publicKey))
+        const decryptedMessagesDetail = await decryptMessagesWorker(chatHistoryWithPartner.messages, encryptionKey, hexToBytes(chatHistoryWithPartner.publicKey))
         activeChatStore.setState(decryptedMessagesDetail)
       } catch(error) {
         if(error instanceof DOMException && error.name === "AbortError") {
@@ -82,7 +83,7 @@ export default function ChatArea() {
     
     fetchChatContext()
 
-  }, [selectedUser])
+  }, [selectedUser?.id])
 
 
   async function handleSendMessage(text: string) {
@@ -129,7 +130,7 @@ export default function ChatArea() {
       isEdited: false,
       status: "sending",
       replyId: null,
-      createdAt: new Date()
+      createdAt: formatDate((new Date()).toString())
     }
 
     activeChatStore.addNewMessage(newMessage)

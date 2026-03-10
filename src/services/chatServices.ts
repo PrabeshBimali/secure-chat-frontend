@@ -3,6 +3,7 @@ import type { MessageDetailForUI } from "../store/ActiveChatStore";
 import type { HTTPResponse } from "../types/global.interfaces";
 import { decryptMessage } from "../lib/crypto/msgEncDec";
 import { formatDate } from "../lib/utils/dateFormatter";
+import {} from "../lib/crypto/decryptWorker"
 
 const API_URL = `${import.meta.env.VITE_API_URL}`
 
@@ -119,6 +120,28 @@ export async function sendMessage(partnerId: number, ciphertext: string, iv: str
 
   const response = await rawResponse.json() as HTTPResponse<SendMessageResponse>
   return response
+}
+
+export function decryptMessagesWorker(messages: Array<MessageDetail>, encryptionKey: Uint8Array, publicKey: Uint8Array): Promise<Array<MessageDetailForUI>> {
+  console.log("Worker started")
+
+  return new Promise((resolve, reject) => {
+    const worker = new Worker(new URL("../lib/crypto/decryptWorker.ts", import.meta.url), { type: "module" })
+
+    worker.postMessage({ type: "message_decrypt", payload: {messages, encryptionKey, publicKey} })
+
+    worker.onmessage = (e) => {
+      const data = e.data
+      worker.terminate()
+      resolve(data)
+    }
+
+    worker.onerror = (err) => {
+      const error = err
+      worker.terminate()
+      reject(error)
+    }
+  })
 }
 
 export async function decryptMessagesForUI(messages: Array<MessageDetail>, encryptionKey: Uint8Array, publicKey: Uint8Array): Promise<Array<MessageDetailForUI>> {
