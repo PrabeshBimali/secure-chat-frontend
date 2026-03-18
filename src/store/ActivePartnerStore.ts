@@ -7,6 +7,7 @@ export interface ChatPartner {
   friendshipStatus: UserRelationshipStatusType
   roomId: string
   publicKey: string
+  hasMoreHistory: boolean
 }
 
 class ActivePartnerStore {

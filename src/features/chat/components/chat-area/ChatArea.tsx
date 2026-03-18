@@ -4,7 +4,7 @@ import ChatHeader from "./ChatHeader";
 import ChatFooter from "./ChatFooter";
 import MessageList from "./MessageList";
 import { useSelectedUserForChat } from "../../context/SelectedUserForChatProvider";
-import { decryptMessagesForUI, decryptMessagesWorker, getRecentChatHistory, sendMessage } from "../../../../services/chatServices";
+import { decryptMessagesWorker, getChatHistory, getRecentChat, sendMessage } from "../../../../services/chatServices";
 import { useToast } from "../../../../context/ToastProvider";
 import { encryptMessage } from "../../../../lib/crypto/msgEncDec";
 import { privateKeyStore } from "../../../../store/PrivateKeyStore";
@@ -19,6 +19,7 @@ export default function ChatArea() {
   const { user, refreshUser } = useAuth()
   const { selectedUser } = useSelectedUserForChat()
   const [ isMessagesLoading, setIsMessagesLoading ] = useState<boolean>(false)
+  const [ isLoadingHistory, setIsLoadingHistory ] = useState<boolean>(false)
 
   const { addToast } = useToast()
   const activeChatPartner = useSyncExternalStore(activeChatPartnerStore.subscribe, activeChatPartnerStore.getSnapshot)
@@ -41,7 +42,7 @@ export default function ChatArea() {
 
     const fetchChatContext = async () => {
       try {
-        const result = await getRecentChatHistory(selectedUser.id, signal)
+        const result = await getRecentChat(selectedUser.id, signal)
 
         if(!result.success) {
           throw new Error(result.message)
@@ -59,7 +60,8 @@ export default function ChatArea() {
           username: chatHistoryWithPartner.username,
           friendshipStatus: chatHistoryWithPartner.friendshipStatus,
           publicKey: chatHistoryWithPartner.publicKey,
-          roomId: chatHistoryWithPartner.roomid
+          roomId: chatHistoryWithPartner.roomid,
+          hasMoreHistory: chatHistoryWithPartner.hasMoreHistory
         })
 
         const encryptionKey = privateKeyStore.getKey()
@@ -82,6 +84,12 @@ export default function ChatArea() {
     }
     
     fetchChatContext()
+
+    return () => {
+      controller.abort()
+      activeChatStore.setState([])
+      setIsMessagesLoading(false)
+    }
 
   }, [selectedUser?.id])
 
@@ -144,7 +152,6 @@ export default function ChatArea() {
       }
 
       const messageData = response.data
-      console.log(messageData?.status)
 
       // update if current active chat is the same user
       if(messageData?.partnerId === activeChatPartner.id) {
@@ -158,11 +165,60 @@ export default function ChatArea() {
     }
   }
 
+  async function loadHistory() {
+    console.log("WTF is happening?")
+    if(!selectedUser) {
+      return
+    }
+
+    if(!user) {
+      refreshUser()
+      return
+    }
+
+    setIsLoadingHistory(true)
+
+    try {
+      const result = await getChatHistory(selectedUser.id, activeChatStore.getOldestMessageDate())
+
+      if(!result.success) {
+        throw new Error(result.message)
+      }
+
+      const chatHistory = result.data
+
+      if(!chatHistory) {
+        //TODO: maybe handle error better
+        return
+      }
+
+      const encryptionKey = privateKeyStore.getKey()
+      const publicKey = activeChatPartner?.publicKey
+
+      // TODO: send user to pwd only login
+      if(!encryptionKey || !publicKey) {
+        throw Error("Encryption or public key not set")
+      }
+
+      const decryptedMessagesDetail = await decryptMessagesWorker(chatHistory.messages, encryptionKey, hexToBytes(publicKey))
+      console.log(decryptedMessagesDetail)
+      //activeChatStore.setState(decryptedMessagesDetail)
+      
+    } catch(error) {
+      console.error(error)
+      addToast("Failed to load message", "error", 3000)
+    } finally {
+      setIsLoadingHistory(false)
+    }
+  }
+
   return (
     <main className="hidden md:flex flex-1 flex-col bg-bg-secondary/20">
       <ChatHeader/>
       <MessageList
         isMessagesLoading={isMessagesLoading}
+        isLoadingHistory={isLoadingHistory}
+        onLoadHistory={loadHistory}
       />
       <ChatFooter
         chatPartner={activeChatPartner}

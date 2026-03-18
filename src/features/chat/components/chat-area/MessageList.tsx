@@ -6,28 +6,54 @@ import MessageBox from "./MessageBox"
 
 interface MessageListProps {
   isMessagesLoading: boolean
+  isLoadingHistory: boolean
+  onLoadHistory: () => void
 }
 
 export default function MessageList(props: MessageListProps) {
+  
+  const scrollRef = useRef<HTMLDivElement>(null)
   const messages = useSyncExternalStore(activeChatStore.subscribe, activeChatStore.getSnapshot)
 
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
-  const { isMessagesLoading } = props
+  const { isMessagesLoading, isLoadingHistory, onLoadHistory } = props
   const { selectedUser } = useSelectedUserForChat()
 
   /* 
     TODO: This scroll logic scrolls back user to bottom even when they are reading chat history if new message is received
     this should only be scrolled to bottom if they are close to it.
   */
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
-  
   useEffect(() => {
+    const endContainer = messagesEndRef.current
+    if(!endContainer) return
+
+    const scrollToBottom = () => {
+      endContainer.scrollIntoView({ behavior: "smooth" })
+    }
     scrollToBottom()
   }, [messages])
 
+
+  useEffect(() => {
+    const container = scrollRef.current
+    if (!container) return
+  
+    const handleScroll = () => {
+      const position = container.scrollTop - 100
+
+      if(position <= 0 && !isLoadingHistory) {
+        onLoadHistory()
+      }
+    }
+
+    container.addEventListener('scroll', handleScroll, { passive: true });
+
+    return () => {
+      container.removeEventListener('scroll', handleScroll);
+    };
+  }, [isMessagesLoading])
+  
   if(!selectedUser) {
     return(
       <div className="flex-1 flex flex-col items-center justify-center bg-bg-primary text-text-secondary">
@@ -50,7 +76,12 @@ export default function MessageList(props: MessageListProps) {
   }
 
   return (
-    <div className="flex-1 overflow-y-auto p-6 space-y-4 flex flex-col">
+    <div ref={scrollRef} className="flex-1 overflow-y-auto p-6 space-y-4 flex flex-col">
+      <div className={`flex-1 flex flex-col items-center justify-center p-5 text-bg-tertiary ${ isLoadingHistory ? "" : "invisible"}`}>
+        <div className="w-4 h-4 border-3 border-t-blue-500 border-bg-secondary rounded-full animate-spin mb-4" />
+        <p className="text-xs font-medium">Loading message History...</p>
+      </div>
+
       <div className="flex-1"/>
       {
         messages.map((message) => {

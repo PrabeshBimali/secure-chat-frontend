@@ -35,13 +35,18 @@ export interface MessageDetail {
   replyId: string | null
 }
 
-interface RecentChatHistoryResponse {
+interface ChatHistoryResponse {
   id: number
+  hasMoreHistory: boolean
+  messages: Array<MessageDetail>
+}
+
+
+interface RecentChatResponse extends ChatHistoryResponse {
   username: string
   publicKey: string
   friendshipStatus: UserRelationshipStatusType
   roomid: string
-  messages: Array<MessageDetail>
 }
 
 interface SendMessageResponse {
@@ -79,14 +84,24 @@ export async function searchUser(userid: number, searchTerm: string, signal: Abo
   return response
 }
 
-export async function getRecentChatHistory(userid: number, signal: AbortSignal): Promise<HTTPResponse<RecentChatHistoryResponse>> {
+export async function getRecentChat(userid: number, signal: AbortSignal): Promise<HTTPResponse<RecentChatResponse>> {
   const rawResponse = await fetch(`${API_URL}/chat/${userid}`, {
     signal: signal,
     method: "GET",
     credentials: "include"
   })
 
-  const response: HTTPResponse<RecentChatHistoryResponse> = await rawResponse.json()
+  const response: HTTPResponse<RecentChatResponse> = await rawResponse.json()
+  return response
+}
+
+export async function getChatHistory(userid: number, beforeDate: string): Promise<HTTPResponse<ChatHistoryResponse>> {
+  const rawResponse = await fetch(`${API_URL}/chat/history?userid=${userid}&before=${beforeDate}`, {
+    method: "GET",
+    credentials: "include"
+  })
+
+  const response: HTTPResponse<ChatHistoryResponse> = await rawResponse.json()
   return response
 }
 
@@ -122,6 +137,7 @@ export async function sendMessage(partnerId: number, ciphertext: string, iv: str
   return response
 }
 
+//TODO: improve this so that same worker is utilized instead of terminating and creating new one on every function call
 export function decryptMessagesWorker(messages: Array<MessageDetail>, encryptionKey: Uint8Array, publicKey: Uint8Array): Promise<Array<MessageDetailForUI>> {
   console.log("Worker started")
 

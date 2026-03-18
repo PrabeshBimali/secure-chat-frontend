@@ -28,6 +28,10 @@ class ActiveChatStore {
     return this.state
   }
 
+  getOldestMessageDate = (): string => {
+    return this.state[0].createdAt
+  }
+
   subscribe = (callback: StoreListenerType) => {
     this.listeners.add(callback)
 
