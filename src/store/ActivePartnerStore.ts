@@ -37,6 +37,13 @@ class ActivePartnerStore {
     this.state = chatPartner
     this.notifyAllListeners()
   }
+
+  setHasMoreHistory(hasMore: boolean) {
+    if(!this.state) return
+
+    this.state = {...this.state, hasMoreHistory: hasMore}
+    this.notifyAllListeners()
+  }
 }
 
 export const activeChatPartnerStore = new ActivePartnerStore()

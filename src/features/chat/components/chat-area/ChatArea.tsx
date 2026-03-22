@@ -138,7 +138,8 @@ export default function ChatArea() {
       isEdited: false,
       status: "sending",
       replyId: null,
-      createdAt: formatDate((new Date()).toString())
+      createdAt: formatDate((new Date()).toISOString()),
+      formattedDate: formatDate((new Date()).toString()) 
     }
 
     activeChatStore.addNewMessage(newMessage)
@@ -166,7 +167,6 @@ export default function ChatArea() {
   }
 
   async function loadHistory() {
-    console.log("WTF is happening?")
     if(!selectedUser) {
       return
     }
@@ -186,6 +186,7 @@ export default function ChatArea() {
       }
 
       const chatHistory = result.data
+      console.log("History", chatHistory)
 
       if(!chatHistory) {
         //TODO: maybe handle error better
@@ -201,8 +202,8 @@ export default function ChatArea() {
       }
 
       const decryptedMessagesDetail = await decryptMessagesWorker(chatHistory.messages, encryptionKey, hexToBytes(publicKey))
-      console.log(decryptedMessagesDetail)
-      //activeChatStore.setState(decryptedMessagesDetail)
+      activeChatStore.addHistory(decryptedMessagesDetail)
+      activeChatPartnerStore.setHasMoreHistory(chatHistory.hasMoreHistory)
       
     } catch(error) {
       console.error(error)
@@ -219,6 +220,7 @@ export default function ChatArea() {
         isMessagesLoading={isMessagesLoading}
         isLoadingHistory={isLoadingHistory}
         onLoadHistory={loadHistory}
+        hasMoreHistory={activeChatPartner?.hasMoreHistory}
       />
       <ChatFooter
         chatPartner={activeChatPartner}

@@ -1,23 +1,25 @@
 import { IoChatbubble } from "react-icons/io5"
 import { useSelectedUserForChat } from "../../context/SelectedUserForChatProvider"
-import { useEffect, useRef, useSyncExternalStore } from "react"
+import React, { useEffect, useRef, useSyncExternalStore } from "react"
 import { activeChatStore } from "../../../../store/ActiveChatStore"
 import MessageBox from "./MessageBox"
 
 interface MessageListProps {
   isMessagesLoading: boolean
   isLoadingHistory: boolean
-  onLoadHistory: () => void
+  hasMoreHistory: boolean | undefined
+  onLoadHistory: () => Promise<void>
 }
 
 export default function MessageList(props: MessageListProps) {
   
-  const scrollRef = useRef<HTMLDivElement>(null)
   const messages = useSyncExternalStore(activeChatStore.subscribe, activeChatStore.getSnapshot)
+  const isFetchingHistoryRef = useRef(false)
+  const cooldownHistoryRef = useRef(false)
 
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
-  const { isMessagesLoading, isLoadingHistory, onLoadHistory } = props
+  const { isMessagesLoading, isLoadingHistory, hasMoreHistory, onLoadHistory } = props
   const { selectedUser } = useSelectedUserForChat()
 
   /* 
@@ -35,24 +37,33 @@ export default function MessageList(props: MessageListProps) {
   }, [messages])
 
 
-  useEffect(() => {
-    const container = scrollRef.current
-    if (!container) return
-  
-    const handleScroll = () => {
-      const position = container.scrollTop - 100
+  const handleScroll = async (e: React.UIEvent<HTMLDivElement>) => {
+    const container = e.currentTarget
 
-      if(position <= 0 && !isLoadingHistory) {
-        onLoadHistory()
-      }
+    if (
+      container.scrollTop > 100 ||
+      isLoadingHistory ||
+      !hasMoreHistory ||
+      isFetchingHistoryRef.current ||
+      cooldownHistoryRef.current
+    ) {
+      return
     }
 
-    container.addEventListener('scroll', handleScroll, { passive: true });
+    try {
+      isFetchingHistoryRef.current = true
 
-    return () => {
-      container.removeEventListener('scroll', handleScroll);
-    };
-  }, [isMessagesLoading])
+      await onLoadHistory()
+
+      cooldownHistoryRef.current = true
+      setTimeout(() => {
+        cooldownHistoryRef.current = false
+      }, 5000)
+
+    } finally {
+      isFetchingHistoryRef.current = false
+    }
+  }
   
   if(!selectedUser) {
     return(
@@ -76,7 +87,7 @@ export default function MessageList(props: MessageListProps) {
   }
 
   return (
-    <div ref={scrollRef} className="flex-1 overflow-y-auto p-6 space-y-4 flex flex-col">
+    <div onScroll={handleScroll} className="flex-1 overflow-y-auto p-6 space-y-4 flex flex-col">
       <div className={`flex-1 flex flex-col items-center justify-center p-5 text-bg-tertiary ${ isLoadingHistory ? "" : "invisible"}`}>
         <div className="w-4 h-4 border-3 border-t-blue-500 border-bg-secondary rounded-full animate-spin mb-4" />
         <p className="text-xs font-medium">Loading message History...</p>

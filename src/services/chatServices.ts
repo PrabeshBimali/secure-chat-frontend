@@ -139,7 +139,6 @@ export async function sendMessage(partnerId: number, ciphertext: string, iv: str
 
 //TODO: improve this so that same worker is utilized instead of terminating and creating new one on every function call
 export function decryptMessagesWorker(messages: Array<MessageDetail>, encryptionKey: Uint8Array, publicKey: Uint8Array): Promise<Array<MessageDetailForUI>> {
-  console.log("Worker started")
 
   return new Promise((resolve, reject) => {
     const worker = new Worker(new URL("../lib/crypto/decryptWorker.ts", import.meta.url), { type: "module" })
@@ -179,7 +178,8 @@ export async function decryptMessagesForUI(messages: Array<MessageDetail>, encry
       message: decryptedMessage,
       isEdited: value.isEdited,
       status: value.status,
-      createdAt: formatDate(value.createdAt),
+      createdAt: value.createdAt,
+      formattedDate: formatDate(value.createdAt),
       senderId: value.senderId,
       replyId: value.replyId
     }

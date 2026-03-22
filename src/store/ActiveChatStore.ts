@@ -6,6 +6,7 @@ export interface MessageDetailForUI {
   isEdited: boolean
   status: "sending" | "sent" | "delivered" | "read" | "fail"
   createdAt: string
+  formattedDate: string
   senderId: number
   replyId: string | null
 }
@@ -57,6 +58,11 @@ class ActiveChatStore {
       return messageDetail.id === tempid ? {...messageDetail, status: status, id: id} : messageDetail
     })
     this.state = updatedMessages
+    this.notifyAllListeners()
+  }
+
+  addHistory = (messages: Array<MessageDetailForUI>) => {
+    this.state.unshift(...messages)
     this.notifyAllListeners()
   }
 }
