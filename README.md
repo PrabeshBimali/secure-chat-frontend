@@ -29,7 +29,7 @@ User create private key from master seed. Backend verifies user and device using
 3. server send two nonces (random bytes) one for device private key and other for identity private key to sign
 4. frontend will sign nonces and send to backend which will verify if right private keys signed those nonces using saved public keys
 
-### 2. Zero-Knowledge Handshake
+### 3. Zero-Knowledge Handshake
 The backend is "blind." During the connection handshake:
 1.  User A retrieves User B’s **Public Key** from the database.
 2.  User A derives a `sharedSecret` using their own **Private Key**.
@@ -38,7 +38,6 @@ The backend is "blind." During the connection handshake:
 ### 3. Socket Authentication & Presence
 * **Handshake Middleware:** Utilizes `io.use()` to verify **HttpOnly JWT cookies** before establishing a WebSocket connection.
 * **Session Isolation:** Each socket connection is mapped to a verified `userId` on the server, preventing identity spoofing.
-* **Ungoing Research**
 
 ### 4. Attack Vector Mitigations
 * **XSS Defense:** Use of `HttpOnly` cookies for session tokens ensures that even if a script is injected, the session cannot be hijacked.
@@ -66,7 +65,6 @@ The backend is "blind." During the connection handshake:
 ---
 
 ## TODO
-- [ ] **Implementing message transfer:** send encrypted message to server and save it.
 - [ ] **Settings:** Implement Settings to view devices and manage them, change username, password etc.
 - [ ] **Multi-Device Sync:** Handling key distribution across multiple authorized devices.
 

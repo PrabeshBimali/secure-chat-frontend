@@ -33,12 +33,12 @@ class ActivePartnerStore {
     this.listeners.forEach((callback) => callback())
   }
 
-  setState(chatPartner: ChatPartner) {
+  setState = (chatPartner: ChatPartner) => {
     this.state = chatPartner
     this.notifyAllListeners()
   }
 
-  setHasMoreHistory(hasMore: boolean) {
+  setHasMoreHistory = (hasMore: boolean) => {
     if(!this.state) return
 
     this.state = {...this.state, hasMoreHistory: hasMore}

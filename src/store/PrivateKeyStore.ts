@@ -1,4 +1,4 @@
-// TODO this should be stored in session later
+// TODO: this should be stored in session later
 class PrivateKeyStore {
   key: Uint8Array | null
 

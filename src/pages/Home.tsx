@@ -1,5 +1,5 @@
 import Sidebar from "../features/chat/components/sidebar/Sidebar";
-import ChatArea from "../features/chat/components/chat-area/ChatArea";
+import ChatArea from "../features/chat/components/main-view/ChatArea";
 import { ActiveChatProvider } from "../features/chat/context/SelectedUserForChatProvider";
 import BasicLayout from "../layouts/BasicLayout";
 
