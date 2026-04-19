@@ -35,12 +35,10 @@ export default function SettingsList() {
           className="flex items-center gap-4 px-4 py-4 hover:bg-bg-secondary/50 cursor-pointer transition-colors group"
           onClick={() => console.log(`Navigating to ${option.id}`)}
         >
-          {/* Icon Container */}
           <div className="w-10 h-10 rounded-full bg-bg-tertiary/20 flex items-center justify-center text-text-primary shrink-0 group-hover:bg-bg-tertiary/40 transition-colors">
             {option.icon}
           </div>
 
-          {/* Content Area */}
           <div className="flex-1 min-w-0 border-b border-bg-tertiary/10 pb-4">
             <div className="flex justify-between items-center">
               <div>

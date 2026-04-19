@@ -2,11 +2,16 @@ import { useState, useRef, type MouseEvent as MouseEventI } from "react"
 import { IoAdd, IoEllipsisVertical, IoSettingsOutline, IoLogOutOutline, IoArchiveOutline, IoBanOutline } from "react-icons/io5"
 import { useAuth } from "../../../../context/AuthProvider"
 import { sidebarViewStore, type SidebarViewType } from "../../../../store/SidebarViewStore"
+import { useNavigate } from "react-router"
+import { logout } from "../../../../services/authServices"
+import { useToast } from "../../../../context/ToastProvider"
 
 export default function SidebarHeader() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const { user } = useAuth()
+  const { addToast } = useToast()
   const menuRef = useRef<HTMLDivElement>(null)
+  const navigate = useNavigate()
 
   function handleOpenMenu(event: MouseEventI<HTMLDivElement, MouseEvent>) {
     if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
@@ -17,6 +22,24 @@ export default function SidebarHeader() {
   function handleMenuOptionClick(option: SidebarViewType) {
     sidebarViewStore.setState(option)
     setIsMenuOpen(false)
+  }
+
+  async function handleLogout() {
+    try {
+      const response = await logout()
+
+      if(!response.success) {
+        console.error(response)
+      }
+
+    } catch(error) {
+      
+      console.error(error)
+    } finally {
+      addToast("Logged out. Redirecting...", "success", 3000)
+      sessionStorage.clear()
+      navigate("/login")
+    }
   }
 
   return (
@@ -59,7 +82,7 @@ export default function SidebarHeader() {
               <MenuOption 
                 icon={<IoLogOutOutline />} 
                 label="Logout" 
-                onClick={() => console.log('logout')} 
+                onClick={() => handleLogout()} 
                 variant="danger" 
               />
             </div>

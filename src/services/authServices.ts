@@ -137,3 +137,14 @@ export async function verifyRecoveryChallenge(userid: number, signature: string,
 
   return response
 }
+
+export async function logout(): Promise<HTTPResponse<{}>> {
+  const rawResponse = await fetch(`${API_URL}/auth/logout`, {
+    method: "POST",
+    credentials: "include"
+  })
+  console.log(rawResponse)
+
+  const response: HTTPResponse<{}> = await rawResponse.json()
+  return response
+}
