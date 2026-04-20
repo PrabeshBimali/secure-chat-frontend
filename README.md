@@ -1,6 +1,8 @@
 # SecureChat E2EE
 
-A real-time, End-to-End Encrypted (E2EE) messaging platform designed with a focus on cryptographic integrity and modern security practices.
+A real-time, End-to-End Encrypted (E2EE) messaging platform on web, designed with a focus on cryptographic integrity and modern security practices.
+
+## Demo
 
 
 

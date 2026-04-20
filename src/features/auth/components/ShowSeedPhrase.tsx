@@ -2,6 +2,7 @@ import { FaCopy } from "react-icons/fa";
 import PrimaryButton from "../../../components/PrimaryButton";
 import { useState } from "react";
 import { useToast } from "../../../context/ToastProvider";
+import SimpleLink from "../../../components/SimpleLink";
 
 interface ShowSeedPhraseProps {
   rawPhrase: string
@@ -61,6 +62,13 @@ export default function ShowSeedPhrase(props: ShowSeedPhraseProps) {
           <PrimaryButton name="Generate New Key" isLoading={false} handleClick={onSeedRefresh}/>
           <PrimaryButton name="Move Forward" isLoading={false} handleClick={onNext} disable={!isChecked}/>
         </div>
+      </div>
+      <div className="mt-2 text-center">
+        <p className="text-text-secondary">
+          Already have an account? 
+          <SimpleLink to="/login">Login</SimpleLink>
+        </p>
+
       </div>
     </div>
   )

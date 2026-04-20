@@ -11,6 +11,7 @@ import { signDevice, signIdentity } from "../lib/crypto/sign";
 import { privateKeyStore } from "../store/PrivateKeyStore";
 import { decryptMasterSeed } from "../lib/crypto/vault";
 import { derivePrivateKeysFromSeed } from "../lib/crypto/keys";
+import SimpleLink from "../components/SimpleLink";
 
 interface LoginFormData {
   username: string;
@@ -192,6 +193,16 @@ export default function LoginPage() {
           isLoading={loading}
           name="Login"
         />
+        <div className="text-center">
+          <p className="text-text-secondary">
+            Do not have an account? 
+            <SimpleLink to="/register">Register</SimpleLink>
+          </p>
+          <p className="text-text-secondary">
+            Forget Password for the Device?
+            <SimpleLink to="/recover-account">Recover</SimpleLink>
+          </p>
+        </div>
       </div>
     </AuthLayout>
   )

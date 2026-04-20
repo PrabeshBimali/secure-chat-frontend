@@ -7,6 +7,7 @@ import { bytesToHex } from "@noble/curves/utils.js"
 import { useToast } from "../../../context/ToastProvider"
 import { signIdentity } from "../../../lib/crypto/sign"
 import getDeviceInfo from "../../../lib/utils/device"
+import SimpleLink from "../../../components/SimpleLink"
 
 interface RecoveryFormProps {
   onRecoverySuccess: (masterSeed: Uint8Array, device_privk: CryptoKey, device_pbk: string, username: string) => void
@@ -156,6 +157,12 @@ export default function RecoveryForm(props: RecoveryFormProps) {
       <div className="flex md:flex-row flex-col md:justify-center gap-3">
         <PrimaryButton name="Clear" isLoading={false} handleClick={handleClear}/>
         <PrimaryButton name="Submit" isLoading={loading} handleClick={handleLogin}/>
+      </div>
+      <div className="mt-2 text-center">
+        <p className="text-text-secondary">
+          Do not have an account? 
+          <SimpleLink to="/register">Register</SimpleLink>
+        </p>
       </div>
     </div>
   )
