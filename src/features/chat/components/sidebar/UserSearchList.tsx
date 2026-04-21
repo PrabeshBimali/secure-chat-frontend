@@ -63,7 +63,7 @@ export default function UserSearchList() {
           onClick={() => userClicked(user)}
           className="flex items-center gap-3 px-4 py-3 hover:bg-bg-secondary/50 cursor-pointer transition-colors group"
         >
-          <div className="w-12 h-12 rounded-full bg-bg-tertiary/20 flex items-center justify-center font-bold text-text-secondary flex-shrink-0 border border-bg-tertiary/10">
+          <div className="w-12 h-12 rounded-full bg-bg-tertiary flex items-center justify-center font-bold text-white flex-shrink-0 border border-bg-tertiary/10">
             {user.username[0].toUpperCase()}
           </div>
 

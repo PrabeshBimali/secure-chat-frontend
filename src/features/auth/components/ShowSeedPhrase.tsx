@@ -68,7 +68,6 @@ export default function ShowSeedPhrase(props: ShowSeedPhraseProps) {
           Already have an account? 
           <SimpleLink to="/login">Login</SimpleLink>
         </p>
-
       </div>
     </div>
   )

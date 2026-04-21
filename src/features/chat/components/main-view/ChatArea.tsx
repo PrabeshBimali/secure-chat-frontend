@@ -123,7 +123,7 @@ export default function ChatArea() {
     }
 
     if(!activeChatPartner || !activeChatPartner.publicKey) {
-      console.error("Chat partner not exisst")
+      console.error("Chat partner not exist")
       return
     } 
 

@@ -5,7 +5,7 @@ import { useSelectedUserForChat, type SelectedUser } from "../../context/Selecte
 export default function ConversationList() {
   const [ conversationList, setConversationList ] = useState<Array<ConversationData>>([])
   const [ loading, setLoading ] = useState<boolean>(true)
-  const { setSelectedUser } = useSelectedUserForChat()
+  const { selectedUser, setSelectedUser } = useSelectedUserForChat()
 
   useEffect(() => {
     setLoading(true)
@@ -63,9 +63,11 @@ export default function ConversationList() {
         <div 
           key={conversation.roomId} 
           onClick={() => userClicked(conversation)}
-          className="flex items-center gap-3 px-4 py-3 hover:bg-bg-secondary/50 cursor-pointer transition-colors"
+          className={`flex items-center gap-3 px-4 py-3 ${selectedUser?.id === conversation.partnerId ? `bg-bg-secondary` : ""} hover:bg-bg-secondary/50 cursor-pointer transition-colors`}
         >
-          <div className="w-12 h-12 rounded-full bg-bg-tertiary/40 flex-shrink-0" />
+          <div className="w-12 h-12 rounded-full bg-bg-tertiary flex items-center justify-center font-bold text-white flex-shrink-0 border border-bg-tertiary/10">
+            {conversation.partnerName[0].toUpperCase()}
+          </div>
           <div className="flex-1 min-w-0 border-b border-bg-tertiary/10 pb-3">
             <div className="flex justify-between items-baseline">
               <span className="font-semibold truncate text-text-secondary">{conversation.partnerName}</span>

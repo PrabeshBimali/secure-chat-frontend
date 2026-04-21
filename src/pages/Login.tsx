@@ -80,7 +80,10 @@ export default function LoginPage() {
     } else if(response.details.fieldErrors.device) {
       setUsernameError(" ")
       setPasswordError(response.details.fieldErrors.device)
-    } else {
+    } else if(response.details.fieldErrors.email) {
+      addToast(response.message, "error", 5000)
+    } 
+    else {
       addToast("Some Error has occured!", "error", 5000)
     }
   }
