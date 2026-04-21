@@ -26,6 +26,23 @@ A real-time, End-to-End Encrypted (E2EE) messaging platform on web, designed wit
 
 ### Login
 
+
+![Login Form](./public/demo/login-form.jpg)
+
+1. When user enters `username` and `password` first **indexedDB** is checked to make sure data for this user exists. Then `username` and `device public key` from indexedDB is sent to server.
+
+![Nonces for client](./public/demo/32bytes-nonces.jpg)
+
+2. `Server` checks if `username and device public key` are valid then generates two 32 bytes random nonces: `identityNonce` and `deviceNonce` (as shown in figure above) and sends them to the client.
+
+3. After getting `nonces` from `server` client uses `password` entered by user along with salt saved in indexedDB to generate storage key (the key which was used to `encrypt` masterseed before storing in indexedDB). This storage key is used to `decrypt` masterseed.
+
+![Decrypt Master Seed](./public/demo/decrypt-masterseed.jpg)
+
+4. Once `masterseed` is decrypted it can be used to generate `Identity private key` which will sign `identityNonce` and `Device private key` will sign `deviceNonce`. Nonces signed by both private keys are sent to the `server`.
+
+5. After receiving `nonces` signed by `identity and device private keys` server will check if `signatures` are valid against their respective public keys which are stored in server. If both signatures are valid user can login. If any one of the `signatures` is invalid, appropriate error message is sent to client.
+
 ## Tech Stack
 
 - **Frontend:** React, TypeScript, Tailwind CSS
