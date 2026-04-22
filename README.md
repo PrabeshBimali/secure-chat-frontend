@@ -20,9 +20,13 @@ A real-time, End-to-End Encrypted (E2EE) messaging platform on web, designed wit
 5. Password and a random 12 byte **salt** will be used to create storage key using [Aragon2id](https://www.npmjs.com/package/hash-wasm) hashing algorithm. Generated hash will be used to encrypt masterseed using **AES-GCM** algorithm from native `crypto` library.
 6. `private and public keys` for device is generated using **ECDSA** with **P-256** curve.
 
-![Data Saved in IndexedDB](./public/demo/indexeddb.jpg)
+![Data Saved in IndexedDB](./public/demo/indexed-db.jpg)
 
 7. User data like `username, email, identity public key, encryption public key, device name` will be sent to backend and if response is successful `encrypted master seed, device private (non-extractable) and public keys etc.` will be stored in indexedDB.
+
+&nbsp;
+&nbsp;
+&nbsp;
 
 ### Login
 
@@ -42,6 +46,10 @@ A real-time, End-to-End Encrypted (E2EE) messaging platform on web, designed wit
 4. Once `masterseed` is decrypted it can be used to generate `Identity private key` which will sign `identityNonce` and `Device private key` will sign `deviceNonce`. Nonces signed by both private keys are sent to the `server`.
 
 5. After receiving `nonces` signed by `identity and device private keys` server will check if `signatures` are valid against their respective public keys which are stored in server. If both signatures are valid user can login. If any one of the `signatures` is invalid, appropriate error message is sent to client.
+
+&nbsp;
+&nbsp;
+&nbsp;
 
 ### Chatting
 
