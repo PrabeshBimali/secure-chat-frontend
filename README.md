@@ -43,6 +43,26 @@ A real-time, End-to-End Encrypted (E2EE) messaging platform on web, designed wit
 
 5. After receiving `nonces` signed by `identity and device private keys` server will check if `signatures` are valid against their respective public keys which are stored in server. If both signatures are valid user can login. If any one of the `signatures` is invalid, appropriate error message is sent to client.
 
+### Chatting
+
+![Homepage after user logs in for the first time](./public/demo/home-first-login.jpg)
+
+(***Note: Let's say our user is user-A and their friend is user-B***)
+
+1. If `user-A` does not have any chats they can search for other users using their `username` in `search bar`.
+2. When `user-A` finds their `user-B's username` in search list, they can click the `user-B` and send message. Once `user-B` is clicked server will send that `user-B's` data like `id, username, encryption public key etc` which will be saved in `ActiveChatPartner` global store.
+
+![First chat](./public/demo/first-chat.jpg)
+
+3. when `user-A` sends `message` an `encryption key` will be generated using `user-A's` `private encryption key` (*Remember two private keys we generated when registering.*) and `user-B's public key`. This process of generating `shared secret key` without sharing secret key through **insecure channel** is called [**Elliptical Curve Diffie Hellman (ECDH)**](https://cryptobook.nakov.com/asymmetric-key-ciphers/ecdh-key-exchange) key exchange scheme. `Elliptical Curve` because we used **curve25519** to generate public keys for encryption.
+4. Generated `shared secret key` will be used to encrypt `message` before sending it to the `server`. `Server` will check relationship between users and if relationship is valid, save and send message to `user-B`. 
+
+![Message saved in Database](./public/demo/message-saved.jpg)
+
+5. Once `user-B` gets encrypted message from server it will use `user-B's public key` and and its own `private encryption key` to generate same **Shared secret key** which will be used to `decrypt` the `message`.` Message Decryption` can take long time (*few seconds of calculation*) if there are many messsages and it will freeze the UI. So, ir will be performed in different `process` utilizing **Web Worker API** as shown in figure below.
+
+![Utilizing Web Worker](./public/demo/web-worker.jpg)
+
 ## Tech Stack
 
 - **Frontend:** React, TypeScript, Tailwind CSS

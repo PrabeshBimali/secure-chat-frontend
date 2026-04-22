@@ -57,6 +57,14 @@ export default function ConversationList() {
     );
   }
 
+  if (conversationList.length === 0) {
+    return (
+      <div className="p-10 text-center">
+        <p className="text-text-primary/40 font-semibold text-sm">Search for users and start new conversation.</p>
+      </div>
+    )
+  }
+
   return (
     <div className="flex-1 overflow-y-auto scrollbar-hide">
       {conversationList.map((conversation) => (

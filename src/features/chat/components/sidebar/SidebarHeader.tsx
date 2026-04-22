@@ -47,7 +47,7 @@ export default function SidebarHeader() {
       <div className="p-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 rounded-full bg-bg-tertiary flex items-center justify-center font-bold text-white shadow-sm">
-            U
+            {user?.username[0].toUpperCase()}
           </div>
           <h1 
             className="hover:text-text-secondary text-xl font-semibold tracking-tight cursor-pointer"

@@ -32,7 +32,10 @@ export default function ChatFooter({ chatPartner, onSendMesage }: ChatFooterProp
         chatPartner.friendshipStatus === UserRelationshipStatus.REQUEST_RECEIVED 
         && 
         <div className="flex justify-center p-2">
-          <button className="bg-red-600 text-white cursor-pointer p-1 hover:bg-red-500 rounded-sm">Block</button>
+          <p className="p-4 text-center text-text-primary italic">
+            <span className="cursor-pointer font-semi
+            bold text-red-500">Block</span> if you do not want messages from them.
+          </p>
         </div>
       }
       <div className="flex items-end gap-2 max-w-5xl mx-auto">

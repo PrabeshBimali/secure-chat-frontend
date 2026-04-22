@@ -8,7 +8,7 @@ export function validateUsername(username: string): string {
 
   if (user.length > 36) return "Username must be less than 36 characters";
 
-  if (!/^[a-z][a-z0-9_]*$/.test(username)) return "Only letters, numbers, and underscores are allowed";
+  if (!/^[a-zA-Z][a-zA-Z0-9_]*$/.test(username)) return "Only letters, numbers, and underscores are allowed";
 
   return "";
 }
